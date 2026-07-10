@@ -2,21 +2,19 @@
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Drifting ink blobs in the hero, repelled by the pointer ---------- */
-  var hero = document.querySelector('.hero, .app-hero');
-  if (hero && !reduced) {
+  /* ---------- Drifting ink blobs across the whole page, repelled by the pointer ---------- */
+  if (!reduced) {
     var canvas = document.createElement('canvas');
-    canvas.className = 'hero-canvas';
+    canvas.className = 'page-canvas';
     canvas.setAttribute('aria-hidden', 'true');
-    hero.prepend(canvas);
+    document.body.prepend(canvas);
     var ctx = canvas.getContext('2d');
     var accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#4338ca';
     var w = 0, h = 0;
 
     function resize() {
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var r = hero.getBoundingClientRect();
-      w = r.width; h = r.height;
+      w = window.innerWidth; h = window.innerHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
@@ -24,7 +22,9 @@
     window.addEventListener('resize', resize);
 
     var blobs = [];
-    for (var i = 0; i < 16; i++) {
+    var count = Math.max(14, Math.round((window.innerWidth * window.innerHeight) / 60000));
+    if (count > 26) count = 26;
+    for (var i = 0; i < count; i++) {
       blobs.push({
         x: Math.random() * Math.max(w, 800),
         y: Math.random() * Math.max(h, 400),
@@ -36,11 +36,10 @@
     }
 
     var mx = -9999, my = -9999;
-    hero.addEventListener('pointermove', function (e) {
-      var r = hero.getBoundingClientRect();
-      mx = e.clientX - r.left; my = e.clientY - r.top;
+    window.addEventListener('pointermove', function (e) {
+      mx = e.clientX; my = e.clientY;
     });
-    hero.addEventListener('pointerleave', function () { mx = -9999; my = -9999; });
+    document.documentElement.addEventListener('mouseleave', function () { mx = -9999; my = -9999; });
 
     function tick() {
       ctx.clearRect(0, 0, w, h);
