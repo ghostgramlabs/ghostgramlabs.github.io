@@ -134,26 +134,55 @@ header {
   pointer-events: none;
 }
 
-/* ---------- Cursor companion ---------- */
-.cursor-ghost {
+/* ---------- Cursor runner: a little man chasing the pointer ---------- */
+.cursor-runner {
   position: fixed;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--accent);
-  border-radius: 50%;
+  width: 22px;
+  height: 31px;
   pointer-events: none;
   z-index: 9999;
   opacity: 0;
-  transition: opacity 0.3s, width 0.18s, height 0.18s, background 0.18s;
-  mix-blend-mode: multiply;
+  transition: opacity 0.3s;
 }
 
-.cursor-ghost.is-hover {
-  width: 46px;
-  height: 46px;
-  background: var(--tint);
+.cursor-runner svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.cursor-runner .head { fill: var(--ink); }
+
+.cursor-runner line {
+  stroke: var(--ink);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.cursor-runner .arm { transform-box: view-box; transform-origin: 12px 11.5px; }
+.cursor-runner .leg { transform-box: view-box; transform-origin: 12px 19px; }
+
+.cursor-runner.moving svg { animation: gg-bob 0.36s ease-in-out infinite; }
+.cursor-runner.moving .l1 { animation: gg-swing-big 0.36s linear infinite; }
+.cursor-runner.moving .l2 { animation: gg-swing-big 0.36s linear infinite; animation-delay: -0.18s; }
+.cursor-runner.moving .a1 { animation: gg-swing 0.36s linear infinite; animation-delay: -0.18s; }
+.cursor-runner.moving .a2 { animation: gg-swing 0.36s linear infinite; }
+
+@keyframes gg-swing-big {
+  0%, 100% { transform: rotate(32deg); }
+  50% { transform: rotate(-32deg); }
+}
+
+@keyframes gg-swing {
+  0%, 100% { transform: rotate(22deg); }
+  50% { transform: rotate(-22deg); }
+}
+
+@keyframes gg-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 }
 
 .hero .eyebrow {
