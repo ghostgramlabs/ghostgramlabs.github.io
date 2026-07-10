@@ -86,7 +86,11 @@
     }
   }
 
-  if (!reduced && window.fetch) {
+  /* preview override for testing: add ?weather=rain or ?weather=snow to the URL */
+  var forced = /[?&]weather=(rain|snow)/.exec(location.search);
+  if (!reduced && forced) {
+    setupWeather(forced[1], innerWidth, innerHeight);
+  } else if (!reduced && window.fetch) {
     fetch('https://ipwho.is/?fields=success,latitude,longitude')
       .then(function (r) { return r.json(); })
       .then(function (loc) {
