@@ -101,7 +101,7 @@
       }
     }
     if (m === 'cloudy' || m === 'overcast' || m === 'rain' || m === 'thunder') {
-      var counts = { cloudy: 5, overcast: 8, rain: 4, thunder: 5 };
+      var counts = { cloudy: 6, overcast: 12, rain: 5, thunder: 7 };
       for (i = 0; i < counts[m]; i++) {
         clouds.push({
           x: Math.random() * w,
@@ -114,10 +114,10 @@
       }
     }
     if (m === 'fog') {
-      for (i = 0; i < 5; i++) {
+      for (i = 0; i < 8; i++) {
         fogBands.push({
           x: Math.random() * w,
-          y: (i + 0.5) * (h / 5),
+          y: (i + 0.5) * (h / 8),
           v: 0.15 + Math.random() * 0.25,
           rw: w * (0.35 + Math.random() * 0.25)
         });
@@ -258,9 +258,20 @@
   }
 
   function drawClouds() {
-    var col = mode === 'thunder' ? 'rgba(92, 102, 122, 0.35)'
-      : mode === 'overcast' ? 'rgba(130, 140, 158, 0.3)'
-      : 'rgba(150, 160, 178, 0.26)';
+    /* a wash over the sky so grey days actually read as grey */
+    if (mode === 'thunder') {
+      ctx.fillStyle = 'rgba(76, 84, 104, 0.14)';
+      ctx.fillRect(0, 0, w, h);
+    } else if (mode === 'overcast') {
+      ctx.fillStyle = 'rgba(130, 138, 154, 0.12)';
+      ctx.fillRect(0, 0, w, h);
+    } else if (mode === 'rain') {
+      ctx.fillStyle = 'rgba(120, 132, 150, 0.08)';
+      ctx.fillRect(0, 0, w, h);
+    }
+    var col = mode === 'thunder' ? 'rgba(64, 72, 92, 0.5)'
+      : mode === 'overcast' ? 'rgba(105, 115, 135, 0.42)'
+      : 'rgba(140, 150, 170, 0.32)';
     ctx.fillStyle = col;
     for (var i = 0; i < clouds.length; i++) {
       var c = clouds[i];
@@ -275,13 +286,15 @@
   }
 
   function drawFog() {
-    ctx.fillStyle = 'rgba(196, 200, 210, 0.2)';
+    ctx.fillStyle = 'rgba(148, 156, 172, 0.12)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(164, 172, 188, 0.34)';
     for (var i = 0; i < fogBands.length; i++) {
       var f = fogBands[i];
       f.x += f.v;
       if (f.x - f.rw > w) f.x = -f.rw;
       ctx.beginPath();
-      ctx.ellipse(f.x, f.y, f.rw, 36, 0, 0, 6.2832);
+      ctx.ellipse(f.x, f.y, f.rw, 52, 0, 0, 6.2832);
       ctx.fill();
     }
   }
@@ -317,28 +330,51 @@
     }
   }
 
+  var bolt = null;
   function drawFlash() {
     var now = performance.now();
     if (now > nextFlash) {
-      flashA = 0.16;
-      nextFlash = now + 6000 + Math.random() * 9000;
+      flashA = 0.22;
+      nextFlash = now + 3500 + Math.random() * 5500;
+      /* draw a fresh zigzag bolt from cloud height */
+      var bx = w * (0.15 + Math.random() * 0.7), by = 40;
+      bolt = [[bx, by]];
+      var steps = 5 + Math.floor(Math.random() * 3);
+      for (var i = 0; i < steps; i++) {
+        bx += (Math.random() - 0.5) * 70;
+        by += h * 0.07 + Math.random() * h * 0.05;
+        bolt.push([bx, by]);
+      }
     }
-    if (flashA > 0.004) {
-      ctx.fillStyle = 'rgba(255, 252, 235, ' + flashA + ')';
+    if (flashA > 0.006) {
+      ctx.fillStyle = 'rgba(255, 250, 225, ' + flashA + ')';
       ctx.fillRect(0, 0, w, h);
-      flashA *= 0.86;
+      if (bolt) {
+        ctx.strokeStyle = 'rgba(240, 190, 70, ' + Math.min(1, flashA * 5) + ')';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(bolt[0][0], bolt[0][1]);
+        for (var j = 1; j < bolt.length; j++) ctx.lineTo(bolt[j][0], bolt[j][1]);
+        ctx.stroke();
+      }
+      flashA *= 0.88;
+    } else {
+      bolt = null;
     }
   }
 
   function tick() {
     ctx.clearRect(0, 0, w, h);
+    /* the app icons float in every kind of weather — the weather draws over them */
     if (mode === 'sunny') { drawSun(); drawIcons(0.3); }
-    else if (mode === 'cloudy') { drawSun(); drawClouds(); drawIcons(0.3); }
-    else if (mode === 'overcast') { drawClouds(); drawIcons(0.26); }
-    else if (mode === 'fog') { drawIcons(0.16); drawFog(); }
-    else if (mode === 'rain') { drawClouds(); drawRain(); }
-    else if (mode === 'thunder') { drawClouds(); drawRain(); drawFlash(); }
-    else if (mode === 'snow') { drawSnow(); }
+    else if (mode === 'cloudy') { drawSun(); drawIcons(0.28); drawClouds(); }
+    else if (mode === 'overcast') { drawIcons(0.26); drawClouds(); }
+    else if (mode === 'fog') { drawIcons(0.24); drawFog(); }
+    else if (mode === 'rain') { drawIcons(0.22); drawClouds(); drawRain(); }
+    else if (mode === 'thunder') { drawIcons(0.22); drawClouds(); drawRain(); drawFlash(); }
+    else if (mode === 'snow') { drawIcons(0.24); drawSnow(); }
     else { drawIcons(0.3); }
     requestAnimationFrame(tick);
   }
