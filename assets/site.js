@@ -1,4 +1,57 @@
 /* GhostGram Labs — living page bits */
+
+/* ---------- Cookie consent (Google Consent Mode) ---------- */
+(function () {
+  var KEY = 'gg-consent';
+
+  function grant() {
+    if (typeof gtag === 'function') {
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+    }
+  }
+
+  function showBanner() {
+    if (document.querySelector('.consent')) return;
+    var el = document.createElement('div');
+    el.className = 'consent';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', 'Cookie consent');
+    el.innerHTML =
+      '<p><strong>Can I count your visit?</strong> This site uses Google Analytics to see how many people visit and from which country. No ads, nothing sold. <a href="/privacy.html">Details</a></p>' +
+      '<div class="consent-actions">' +
+      '<button type="button" class="btn btn-primary consent-yes">Sure, count me</button>' +
+      '<button type="button" class="btn btn-ghost consent-no">No thanks</button>' +
+      '</div>';
+    document.body.appendChild(el);
+    el.querySelector('.consent-yes').addEventListener('click', function () {
+      try { localStorage.setItem(KEY, 'granted'); } catch (e) {}
+      grant();
+      el.remove();
+    });
+    el.querySelector('.consent-no').addEventListener('click', function () {
+      try { localStorage.setItem(KEY, 'denied'); } catch (e) {}
+      el.remove();
+    });
+  }
+
+  /* let the privacy page reopen the banner */
+  window.ggCookieSettings = function () {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    showBanner();
+  };
+
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved === 'granted') { grant(); }
+  else if (saved !== 'denied') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showBanner);
+    } else {
+      showBanner();
+    }
+  }
+})();
+
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
