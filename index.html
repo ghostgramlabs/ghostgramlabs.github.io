@@ -1,28 +1,364 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>GhostGram Labs</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GhostGram Labs — Free, Non-Profit Android Apps | PettiBox, DirectServe, SpeakAlert</title>
+<meta name="description" content="GhostGram Labs is a non-profit collection of free Android side projects: PettiBox bookmark manager & save-for-later app, DirectServe WiFi file transfer to iPhone/PC/Mac, and SpeakAlert talking voice reminder. 100% free, no ads, no accounts, offline-first. Download on Google Play.">
+<meta name="keywords" content="GhostGram Labs, PettiBox, DirectServe, SpeakAlert, bookmark manager android, save for later app, file transfer android to iphone, wifi file transfer app, voice reminder app, talking alarm android, privacy android apps, offline android apps, free android apps no ads">
+<meta name="author" content="GhostGram Labs">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://ghostgramlabs.com/">
+<meta name="theme-color" content="#faf9f6">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>G</text></svg>">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghostgramlabs.com/">
+<meta property="og:site_name" content="GhostGram Labs">
+<meta property="og:title" content="GhostGram Labs — Free, Non-Profit Android Apps">
+<meta property="og:description" content="Free, non-profit Android apps with no ads and no accounts: PettiBox (bookmark manager), DirectServe (WiFi file transfer), SpeakAlert (voice reminders). Side projects built so people get useful tools for free.">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GhostGram Labs — Free, Non-Profit Android Apps">
+<meta name="twitter:description" content="Free Android apps with no ads and no accounts: PettiBox, DirectServe, SpeakAlert. Your data stays on your device.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+
+<!-- Structured data: Organization + WebSite + Apps -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://ghostgramlabs.com/#org",
+      "name": "GhostGram Labs",
+      "url": "https://ghostgramlabs.com/",
+      "email": "ghostgramlabs@gmail.com",
+      "description": "GhostGram Labs is not a company — it is the name an independent developer publishes free, non-profit Android side projects under, built in their own free time with the help of modern AI tools. All apps are completely free with no ads, no accounts and no monetization, built so people can have useful, privacy-respecting tools for free.",
+      "sameAs": [
+        "https://play.google.com/store/apps/dev?id=com.ghostgramlabs"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://ghostgramlabs.com/#website",
+      "url": "https://ghostgramlabs.com/",
+      "name": "GhostGram Labs",
+      "publisher": { "@id": "https://ghostgramlabs.com/#org" }
+    },
+    {
+      "@type": "ItemList",
+      "name": "GhostGram Labs Android Apps",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "SoftwareApplication",
+            "name": "PettiBox: Save & Find — Bookmark Manager",
+            "url": "https://ghostgramlabs.com/PettiBox/",
+            "installUrl": "https://play.google.com/store/apps/details?id=com.ghostgramlabs.pettibox",
+            "image": "https://ghostgramlabs.com/assets/img/pettibox-icon.webp",
+            "operatingSystem": "Android",
+            "applicationCategory": "ProductivityApplication",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "description": "Private, offline-first save-for-later app and bookmark manager for Android. Save links, notes, screenshots, PDFs and files from any app, organize with collections and tags, find anything with OCR search and set reminders.",
+            "author": { "@id": "https://ghostgramlabs.com/#org" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "item": {
+            "@type": "SoftwareApplication",
+            "name": "DirectServe: File Transfer",
+            "url": "https://ghostgramlabs.com/DirectServe/",
+            "installUrl": "https://play.google.com/store/apps/details?id=com.ghostgramlabs.directserve",
+            "image": "https://ghostgramlabs.com/assets/img/directserve-icon.webp",
+            "operatingSystem": "Android",
+            "applicationCategory": "UtilitiesApplication",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "description": "Transfer files from Android to iPhone, PC, Mac, TV, tablet or Chromebook over WiFi or hotspot — no app needed on the receiving device, no cloud, no cables, no accounts. Just open a link or scan a QR code.",
+            "author": { "@id": "https://ghostgramlabs.com/#org" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "SoftwareApplication",
+            "name": "SpeakAlert: Voice Reminder",
+            "url": "https://ghostgramlabs.com/SpeakAlert/",
+            "installUrl": "https://play.google.com/store/apps/details?id=com.ghostgramlabs.speakalert",
+            "image": "https://ghostgramlabs.com/assets/img/speakalert-icon.webp",
+            "operatingSystem": "Android",
+            "applicationCategory": "ProductivityApplication",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "description": "Talking reminder and voice alarm app for Android. Record your own voice or use text-to-speech for reminders that speak to you at scheduled times — even when the screen is locked. Fully offline, free, no ads.",
+            "author": { "@id": "https://ghostgramlabs.com/#org" }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Are GhostGram Labs apps free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely. GhostGram Labs is not a company — these are non-profit side projects by an independent developer. PettiBox, DirectServe and SpeakAlert are free on Google Play with no ads, no subscriptions, no in-app purchases and no hidden charges, because the goal is simply that people get useful tools for free." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do GhostGram Labs apps require an account or internet?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No account is required for any GhostGram Labs app. The apps are offline-first: your data stays on your device. Internet or local WiFi is only used for optional features like link previews, Google Drive backup or local file transfer." }
+        },
+        {
+          "@type": "Question",
+          "name": "What apps does GhostGram Labs make?",
+          "acceptedAnswer": { "@type": "Answer", "text": "GhostGram Labs is an independent developer's collection of three free Android apps: PettiBox (a save-for-later bookmark manager for links, notes, screenshots, PDFs and files), DirectServe (WiFi file transfer from Android to iPhone, PC, Mac, TV or Chromebook without installing anything on the receiving device), and SpeakAlert (a talking voice reminder and alarm app)." }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I contact GhostGram Labs?",
+          "acceptedAnswer": { "@type": "Answer", "text": "You can reach GhostGram Labs at ghostgramlabs@gmail.com for support, feedback or feature requests." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
-
 <body>
+<div class="bg-glow" aria-hidden="true"></div>
 
-<h1>GhostGram Labs</h1>
+<header>
+  <nav class="nav" aria-label="Main navigation">
+    <a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-2.4 2.5 2.4 2.5-2.4 2.5 2.4 2.5-2.4 3 2.4V10a8 8 0 0 0-8-8z"/><line x1="9" y1="10" x2="9.01" y2="10"/><line x1="15" y1="10" x2="15.01" y2="10"/></svg></span>GhostGram Labs</a>
+    <div class="nav-links">
+      <a href="#apps">Apps</a>
+      <a href="#why" class="hide-sm">Why Us</a>
+      <a href="#faq" class="hide-sm">FAQ</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+</header>
 
-<p>
-We build simple, privacy-focused Android applications.
-</p>
+<main>
+  <!-- HERO -->
+  <section class="hero container">
+    <span class="eyebrow">Non-Profit · 100% Free · No Ads · No Accounts</span>
+    <h1>Useful Android apps,<br><span class="grad">free for everyone</span>.</h1>
+    <p class="lead">GhostGram Labs isn't a company — it's a collection of side projects by one independent developer, built and shared for free so people get tools that respect them. Save anything with <strong>PettiBox</strong>, share files anywhere with <strong>DirectServe</strong>, never miss a thing with <strong>SpeakAlert</strong>. No ads, no profit motive, and your data stays on your device — always.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#apps">Explore Our Apps</a>
+      <a class="btn btn-ghost" href="https://play.google.com/store/apps/dev?id=com.ghostgramlabs" rel="noopener" target="_blank">View on Google Play</a>
+    </div>
+  </section>
 
-<h2>Apps</h2>
+  <!-- APPS -->
+  <section id="apps" class="container">
+    <h2 class="section-title">Our Apps</h2>
+    <p class="section-sub">Three focused tools, one philosophy: no ads, no tracking, no accounts. Download free on Google Play.</p>
 
-<ul>
-<li>
-<a href="/PettiBox/">PettiBox - Bookmark Manager</a>
-</li>
-</ul>
+    <div class="apps-grid">
+      <!-- PettiBox -->
+      <article class="app-card">
+        <div class="app-icon app-icon-img">
+          <img src="/assets/img/pettibox-icon.webp" alt="PettiBox app icon — an illustrated wooden keepsake box" width="60" height="60" loading="lazy">
+        </div>
+        <h3>PettiBox</h3>
+        <p class="app-tag">Save &amp; Find — Bookmark Manager</p>
+        <p class="desc">A private, offline-first save-for-later app. Capture links, notes, screenshots, PDFs and files from any Android app — and actually find them again.</p>
+        <ul>
+          <li>Share into PettiBox from Chrome, YouTube, Instagram, WhatsApp &amp; more</li>
+          <li>Collections, tags, favorites &amp; archive</li>
+          <li>Fast offline search with OCR text recognition</li>
+          <li>Reminders for saved items &amp; optional Google Drive backup</li>
+        </ul>
+        <div class="card-actions">
+          <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.pettibox" rel="noopener" target="_blank" aria-label="Download PettiBox on Google Play">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+            Google Play
+          </a>
+          <a class="btn btn-ghost" href="/PettiBox/">Learn more</a>
+        </div>
+      </article>
 
-<p>
-Contact: ghostgramlabs@gmail.com
-</p>
+      <!-- DirectServe -->
+      <article class="app-card">
+        <div class="app-icon app-icon-img">
+          <img src="/assets/img/directserve-icon.webp" alt="DirectServe app icon" width="60" height="60" loading="lazy">
+        </div>
+        <h3>DirectServe</h3>
+        <p class="app-tag">WiFi File Transfer — No Receiver App Needed</p>
+        <p class="desc">Send files from Android to iPhone, PC, Mac, TV, tablet or Chromebook over WiFi or hotspot. The other device just opens a link — no app, no cloud, no cables.</p>
+        <ul>
+          <li>Works with any device that has a browser</li>
+          <li>Scan a QR code or open a link — done</li>
+          <li>Two-way transfer: send and receive</li>
+          <li>PIN protection, DLNA media server, 100% local</li>
+        </ul>
+        <div class="card-actions">
+          <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.directserve" rel="noopener" target="_blank" aria-label="Download DirectServe on Google Play">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+            Google Play
+          </a>
+          <a class="btn btn-ghost" href="/DirectServe/">Learn more</a>
+        </div>
+      </article>
 
+      <!-- SpeakAlert -->
+      <article class="app-card">
+        <div class="app-icon app-icon-img">
+          <img src="/assets/img/speakalert-icon.webp" alt="SpeakAlert app icon" width="60" height="60" loading="lazy">
+        </div>
+        <h3>SpeakAlert</h3>
+        <p class="app-tag">Voice Reminder — Talking Alarm</p>
+        <p class="desc">Reminders that actually speak to you. Record your own voice or type text and let your phone say it out loud at the right time — even when locked.</p>
+        <ul>
+          <li>Voice recordings or text-to-speech alerts</li>
+          <li>Alarm-style playback, even on lock screen</li>
+          <li>Daily, weekly, monthly &amp; custom repeats</li>
+          <li>Smart snooze, missed-reminder log, fully offline</li>
+        </ul>
+        <div class="card-actions">
+          <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.speakalert" rel="noopener" target="_blank" aria-label="Download SpeakAlert on Google Play">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+            Google Play
+          </a>
+          <a class="btn btn-ghost" href="/SpeakAlert/">Learn more</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section id="why" class="container">
+    <h2 class="section-title">Why these apps are <span class="grad">different</span></h2>
+    <p class="section-sub">These are the kind of apps I want on my own phone — lightweight, honest and private. With no business model behind them, there's no reason to compromise on any of this.</p>
+    <div class="values-grid">
+      <div class="value">
+        <div class="v-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h3>Privacy by Default</h3>
+        <p>Your data stays on your device. No tracking, no analytics harvesting, no selling your information — ever.</p>
+      </div>
+      <div class="value">
+        <div class="v-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+        <h3>Zero Ads</h3>
+        <p>No banners, no popups, no "watch a video to continue". Just clean, distraction-free apps.</p>
+      </div>
+      <div class="value">
+        <div class="v-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M2 8.8a15 15 0 0 1 5.7-3.3"/><path d="M10.7 5.05A15 15 0 0 1 22 8.8"/><path d="M16.7 11.3a10 10 0 0 1 2.3 1.6"/><path d="M5 12.9a10 10 0 0 1 3.5-2.3"/><path d="M12 20h.01"/></svg></div>
+        <h3>Offline-First</h3>
+        <p>Core features work without internet. No account, no sign-in, no cloud lock-in required.</p>
+      </div>
+      <div class="value">
+        <div class="v-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <h3>Fast &amp; Lightweight</h3>
+        <p>Small downloads, quick startup and battery-friendly design that respects older devices too.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDIO NOTE -->
+  <section class="container">
+    <div class="prose">
+      <h2>A note from the developer</h2>
+      <p>GhostGram Labs isn't a company. It's just the name I publish my side projects under. There's no office, no team, no investors — and no business model, on purpose. These apps are built in my own free time, with my own hands and the help of modern AI tools, and shared non-profit so anyone can use them for free. Each one started because something in my daily life was annoying enough to fix: links kept getting lost in chat threads, so PettiBox happened. Moving one video to an iPhone shouldn't need a cloud account, so DirectServe happened. A silent notification never reminded anyone to take their medicine, so SpeakAlert happened.</p>
+      <p>Because I use these apps every day myself, they stay the way I like my own tools: fast, offline, and quiet. No ads, no accounts, no "premium" nag screens. If something's broken or missing, email me at <a href="mailto:ghostgramlabs@gmail.com">ghostgramlabs@gmail.com</a> — the person who wrote the code is the one who reads it.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="container">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <p class="section-sub">Quick answers about GhostGram Labs and our Android apps.</p>
+    <div class="faq">
+      <details>
+        <summary>Are GhostGram Labs apps free?</summary>
+        <div class="faq-a">Yes, completely. GhostGram Labs is not a company — these are non-profit side projects by an independent developer. PettiBox, DirectServe and SpeakAlert are free on Google Play with no ads, no subscriptions, no in-app purchases and no hidden charges, because the goal is simply that people get useful tools for free.</div>
+      </details>
+      <details>
+        <summary>Do your apps need an account or internet connection?</summary>
+        <div class="faq-a">No account is ever required. Our apps are offline-first: everything stays on your device. Internet or local WiFi is only used for optional features like link previews (PettiBox), Google Drive backup (PettiBox) or local network transfer (DirectServe).</div>
+      </details>
+      <details>
+        <summary>Which app should I use to move files from Android to iPhone?</summary>
+        <div class="faq-a">DirectServe. It transfers files over WiFi or hotspot to any device with a browser — iPhone, iPad, PC, Mac, Chromebook or smart TV — with no app installation needed on the receiving side. No AirDrop, no cables, no cloud.</div>
+      </details>
+      <details>
+        <summary>Can SpeakAlert speak reminders when my phone is locked?</summary>
+        <div class="faq-a">Yes. SpeakAlert plays your recorded voice or text-to-speech reminders with alarm-style playback at the scheduled time, even when your device is locked or the app is in the background.</div>
+      </details>
+      <details>
+        <summary>What can I save in PettiBox?</summary>
+        <div class="faq-a">Links, notes, images, screenshots, PDFs and files — shared straight from Chrome, YouTube, Instagram, Reddit, WhatsApp, TikTok, X, Gallery, Files and any Android app that supports sharing. Organize with collections and tags, then find everything with fast offline search and OCR.</div>
+      </details>
+      <details>
+        <summary>How do I get support or request a feature?</summary>
+        <div class="faq-a">Email us at <a href="mailto:ghostgramlabs@gmail.com">ghostgramlabs@gmail.com</a> — we read everything.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD BAND -->
+  <section class="container" id="download">
+    <div class="download-band">
+      <h2>Ready to try them?</h2>
+      <p>All three apps are free on Google Play. Install in seconds — no sign-up, no ads, nothing in the way.</p>
+      <div class="cta-row">
+        <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.pettibox" rel="noopener" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+          Get PettiBox
+        </a>
+        <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.directserve" rel="noopener" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+          Get DirectServe
+        </a>
+        <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.speakalert" rel="noopener" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+          Get SpeakAlert
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="f-col">
+        <a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-2.4 2.5 2.4 2.5-2.4 2.5 2.4 2.5-2.4 3 2.4V10a8 8 0 0 0-8-8z"/><line x1="9" y1="10" x2="9.01" y2="10"/><line x1="15" y1="10" x2="15.01" y2="10"/></svg></span>GhostGram Labs</a>
+        <p style="color:var(--muted);font-size:0.88rem;max-width:280px;margin-top:12px">Free, non-profit Android side projects by an independent developer. Built with care, shared without ads — so useful tools stay free.</p>
+      </div>
+      <div class="f-col">
+        <h4>Apps</h4>
+        <a href="/PettiBox/">PettiBox — Bookmark Manager</a>
+        <a href="/DirectServe/">DirectServe — File Transfer</a>
+        <a href="/SpeakAlert/">SpeakAlert — Voice Reminder</a>
+      </div>
+      <div class="f-col">
+        <h4>Google Play</h4>
+        <a href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.pettibox" rel="noopener" target="_blank">PettiBox on Google Play</a>
+        <a href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.directserve" rel="noopener" target="_blank">DirectServe on Google Play</a>
+        <a href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.speakalert" rel="noopener" target="_blank">SpeakAlert on Google Play</a>
+      </div>
+      <div class="f-col">
+        <h4>Contact &amp; Legal</h4>
+        <a href="mailto:ghostgramlabs@gmail.com">ghostgramlabs@gmail.com</a>
+        <a href="/PettiBox/privacy.html">PettiBox Privacy Policy</a>
+        <a href="/PettiBox/terms.html">PettiBox Terms</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 GhostGram Labs. Google Play and the Google Play logo are trademarks of Google LLC.</div>
+  </div>
+</footer>
 </body>
 </html>

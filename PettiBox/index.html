@@ -2,53 +2,240 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PettiBox - Bookmark Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PettiBox: Save &amp; Find — Bookmark Manager App for Android | GhostGram Labs</title>
+<meta name="description" content="PettiBox is a free, private, offline-first bookmark manager and save-for-later app for Android. Save links, notes, screenshots, PDFs and files from any app, organize with collections and tags, find anything with OCR search. No ads, no account. Download on Google Play.">
+<meta name="keywords" content="PettiBox, bookmark manager android, save for later app, read it later android, link organizer, save links app, screenshot organizer, save notes app, pocket alternative android, offline bookmark app, OCR search app, save PDF android">
+<meta name="author" content="GhostGram Labs">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://ghostgramlabs.com/PettiBox/">
+<meta name="theme-color" content="#faf9f6">
+<link rel="icon" type="image/webp" href="/assets/img/pettibox-icon.webp">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghostgramlabs.com/PettiBox/">
+<meta property="og:site_name" content="GhostGram Labs">
+<meta property="og:title" content="PettiBox: Save &amp; Find — Bookmark Manager for Android">
+<meta property="og:description" content="Save links, notes, screenshots, PDFs and files from any app. Organize with collections and tags, find anything with offline OCR search. Free, private, no ads.">
+<meta property="og:image" content="https://ghostgramlabs.com/assets/img/pettibox-icon.webp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PettiBox: Save &amp; Find — Bookmark Manager for Android">
+<meta name="twitter:description" content="The private, offline-first save-for-later app for Android. Free on Google Play.">
+<meta name="twitter:image" content="https://ghostgramlabs.com/assets/img/pettibox-icon.webp">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "PettiBox: Save & Find — Bookmark Manager",
+      "url": "https://ghostgramlabs.com/PettiBox/",
+      "installUrl": "https://play.google.com/store/apps/details?id=com.ghostgramlabs.pettibox",
+      "image": "https://ghostgramlabs.com/assets/img/pettibox-icon.webp",
+      "screenshot": [
+        "https://ghostgramlabs.com/assets/img/pettibox-1.webp",
+        "https://ghostgramlabs.com/assets/img/pettibox-2.webp",
+        "https://ghostgramlabs.com/assets/img/pettibox-3.webp",
+        "https://ghostgramlabs.com/assets/img/pettibox-4.webp"
+      ],
+      "operatingSystem": "Android",
+      "applicationCategory": "ProductivityApplication",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "PettiBox is a private, offline-first save-for-later app and bookmark manager for Android. Save links, notes, screenshots, PDFs and files from any app, organize with collections and tags, find anything with fast offline search and OCR text recognition, and set reminders so saved items don't get forgotten.",
+      "author": {
+        "@type": "Organization",
+        "name": "GhostGram Labs",
+        "url": "https://ghostgramlabs.com/",
+        "email": "ghostgramlabs@gmail.com"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "GhostGram Labs", "item": "https://ghostgramlabs.com/" },
+        { "@type": "ListItem", "position": 2, "name": "PettiBox", "item": "https://ghostgramlabs.com/PettiBox/" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is PettiBox free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. PettiBox is free on Google Play with no ads and no subscription. It is a non-profit side project by an independent developer. Core features work fully offline and require no account." }
+        },
+        {
+          "@type": "Question",
+          "name": "What can I save in PettiBox?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Links, notes, images, screenshots, PDFs and files. Share them into PettiBox from Chrome, YouTube, Instagram, Reddit, WhatsApp, TikTok, X, Gallery, Files and any Android app that supports sharing." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does PettiBox access my Google Drive files?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Google Drive access is optional and used only for PettiBox backup and restore. PettiBox never accesses unrelated Google Drive files." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can PettiBox search text inside images and PDFs?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. PettiBox uses OCR text recognition so you can search for words that appear inside your saved screenshots, images and PDFs — all processed on your device." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
+<body class="theme-pettibox">
+<div class="bg-glow" aria-hidden="true"></div>
 
-<body>
+<header>
+  <nav class="nav" aria-label="Main navigation">
+    <a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-2.4 2.5 2.4 2.5-2.4 2.5 2.4 2.5-2.4 3 2.4V10a8 8 0 0 0-8-8z"/><line x1="9" y1="10" x2="9.01" y2="10"/><line x1="15" y1="10" x2="15.01" y2="10"/></svg></span>GhostGram Labs</a>
+    <div class="nav-links">
+      <a href="/#apps">Apps</a>
+      <a href="/DirectServe/" class="hide-sm">DirectServe</a>
+      <a href="/SpeakAlert/" class="hide-sm">SpeakAlert</a>
+      <a href="/#contact">Contact</a>
+    </div>
+  </nav>
+</header>
 
-<h1>PettiBox: Bookmark Manager</h1>
+<main>
+  <section class="app-hero container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / PettiBox</nav>
+    <div class="app-icon app-icon-img">
+      <img src="/assets/img/pettibox-icon.webp" alt="PettiBox app icon — an illustrated wooden keepsake box" width="76" height="76">
+    </div>
+    <h1>PettiBox: <span class="grad">Save &amp; Find</span></h1>
+    <p class="lead">The private, offline-first bookmark manager for Android. Save links, notes, screenshots, PDFs and files from any app — and actually find them again when you need them.</p>
+    <div class="cta-row">
+      <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.pettibox" rel="noopener" target="_blank" aria-label="Download PettiBox free on Google Play">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+        Download Free on Google Play
+      </a>
+    </div>
+  </section>
 
-<p>
-PettiBox is an Android app developed by GhostGram Labs.
-</p>
+  <section class="container shots-section" aria-label="PettiBox screenshots">
+    <div class="shots">
+      <img src="/assets/img/pettibox-1.webp" alt="PettiBox screenshot — save links, notes, screenshots and files in one place" loading="lazy">
+      <img src="/assets/img/pettibox-2.webp" alt="PettiBox screenshot — organize saves into collections with tags" loading="lazy">
+      <img src="/assets/img/pettibox-3.webp" alt="PettiBox screenshot — fast offline search with OCR text recognition" loading="lazy">
+      <img src="/assets/img/pettibox-4.webp" alt="PettiBox screenshot — reminders for saved items" loading="lazy">
+    </div>
+  </section>
 
-<p>
-Save and organize links, notes, images, screenshots,
-PDFs, and files in one place.
-</p>
+  <section class="container">
+    <h2 class="section-title">Everything you save, <span class="grad">in one place</span></h2>
+    <p class="section-sub">Stop losing links in chat threads and screenshots in your gallery. PettiBox is your personal library.</p>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <h3>Save From Any App</h3>
+        <p>Share into PettiBox from Chrome, YouTube, Instagram, Reddit, WhatsApp, TikTok, X, Gallery, Files — anything with an Android share button.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>Collections &amp; Tags</h3>
+        <p>Organize recipes, study notes, work links, shopping ideas, travel plans and documents into collections. Add tags, pin, favorite or archive.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <h3>OCR-Powered Search</h3>
+        <p>Fast offline search that reads text inside your images, screenshots and PDFs. Type a word — find the screenshot it appears in.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>Reminders</h3>
+        <p>Get nudged about that recipe to cook, video to watch or document to review. Saved-for-later actually means later, not never.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M2 8.8a15 15 0 0 1 5.7-3.3"/><path d="M10.7 5.05A15 15 0 0 1 22 8.8"/><path d="M16.7 11.3a10 10 0 0 1 2.3 1.6"/><path d="M5 12.9a10 10 0 0 1 3.5-2.3"/><path d="M12 20h.01"/></svg></div>
+        <h3>Offline &amp; Private</h3>
+        <p>Your saves stay on your device. No account, no subscription, no cloud required. Internet is only used for optional link previews.</p>
+      </div>
+      <div class="feature">
+        <div class="f-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div>
+        <h3>Optional Drive Backup</h3>
+        <p>Back up and restore via your own Google Drive whenever you want. PettiBox never touches unrelated Drive files.</p>
+      </div>
+    </div>
+  </section>
 
-<h2>Features</h2>
+  <section class="container">
+    <div class="prose">
+      <h2>Why PettiBox?</h2>
+      <p>Every day you come across things worth keeping: an article you'll read later, a recipe from Instagram, a screenshot of a receipt, a PDF from work, a product you might buy. They end up scattered across browser bookmarks, chat apps, your gallery and your downloads folder — and when you need them, they're gone.</p>
+      <p>PettiBox is a <strong>save-for-later app and bookmark manager</strong> that fixes this. One shared inbox for links, notes, images, screenshots, PDFs and files. Collections and tags to keep it tidy. Blazing-fast offline search — with OCR text recognition — to find anything in seconds. And reminders, so the things you saved actually come back to you.</p>
+      <p>Unlike cloud bookmark services, PettiBox is <strong>offline-first and private</strong>: no account to create, no subscription to pay, and your data never leaves your device unless you choose to back it up to your own Google Drive.</p>
+      <h2>Google Drive usage</h2>
+      <p>Google Drive access is optional and used only for PettiBox backup and restore. PettiBox does not access unrelated Google Drive files. See the <a href="/PettiBox/privacy.html">Privacy Policy</a> for details.</p>
+    </div>
+  </section>
 
-<ul>
-<li>Save from browser and apps using Android share</li>
-<li>Collections and tags</li>
-<li>Favorites and archive</li>
-<li>Reminders</li>
-<li>Image and PDF text recognition</li>
-<li>Fast search</li>
-<li>Optional Google Drive backup and restore</li>
-</ul>
+  <section class="container">
+    <h2 class="section-title">FAQ</h2>
+    <div class="faq">
+      <details>
+        <summary>Is PettiBox free?</summary>
+        <div class="faq-a">Yes — free on Google Play, with no ads and no subscription. PettiBox is a non-profit side project by an independent developer. Core features work fully offline and require no account.</div>
+      </details>
+      <details>
+        <summary>What can I save in PettiBox?</summary>
+        <div class="faq-a">Links, notes, images, screenshots, PDFs and files — shared from Chrome, YouTube, Instagram, Reddit, WhatsApp, TikTok, X, Gallery, Files and any Android app with a share button.</div>
+      </details>
+      <details>
+        <summary>Can PettiBox search inside images and PDFs?</summary>
+        <div class="faq-a">Yes. On-device OCR text recognition lets you search words that appear inside saved screenshots, images and PDFs.</div>
+      </details>
+      <details>
+        <summary>Does PettiBox access my Google Drive files?</summary>
+        <div class="faq-a">Google Drive access is optional and used only for PettiBox's own backup and restore. It never accesses unrelated Drive files.</div>
+      </details>
+    </div>
+  </section>
 
-<h2>Google Drive Usage</h2>
+  <section class="container">
+    <div class="download-band">
+      <h2>Never lose a save again</h2>
+      <p>PettiBox is free, private and ready in seconds. No sign-up. No ads.</p>
+      <div class="cta-row">
+        <a class="btn btn-play" href="https://play.google.com/store/apps/details?id=com.ghostgramlabs.pettibox" rel="noopener" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.4.2-.6.6-.6 1.1v18.2c0 .5.2.9.6 1.1l10-10.2L3.6 1.8zm11.4 8.8l2.7-2.7-11-6.3 8.3 9zm0 2.8l-8.3 9 11-6.3-2.7-2.7zm4-2.9l-2.9 1.5 2.9 1.5c.9-.5.9-2.5 0-3z"/></svg>
+          Get PettiBox on Google Play
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
 
-<p>
-Google Drive access is optional and used only for
-PettiBox backup and restore. PettiBox does not access
-unrelated Google Drive files.
-</p>
-
-<h2>Links</h2>
-
-<p>
-<a href="privacy.html">Privacy Policy</a>
-</p>
-
-<p>
-Developer: GhostGram Labs<br>
-Contact: ghostgramlabs@gmail.com
-</p>
-
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="f-col">
+        <a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v12l3-2.4 2.5 2.4 2.5-2.4 2.5 2.4 2.5-2.4 3 2.4V10a8 8 0 0 0-8-8z"/><line x1="9" y1="10" x2="9.01" y2="10"/><line x1="15" y1="10" x2="15.01" y2="10"/></svg></span>GhostGram Labs</a>
+      </div>
+      <div class="f-col">
+        <h4>Apps</h4>
+        <a href="/PettiBox/">PettiBox</a>
+        <a href="/DirectServe/">DirectServe</a>
+        <a href="/SpeakAlert/">SpeakAlert</a>
+      </div>
+      <div class="f-col">
+        <h4>Legal &amp; Contact</h4>
+        <a href="/PettiBox/privacy.html">Privacy Policy</a>
+        <a href="/PettiBox/terms.html">Terms of Service</a>
+        <a href="mailto:ghostgramlabs@gmail.com">ghostgramlabs@gmail.com</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 GhostGram Labs. Google Play and the Google Play logo are trademarks of Google LLC.</div>
+  </div>
+</footer>
 </body>
 </html>
