@@ -77,47 +77,47 @@
     document.body.classList.add('weather-' + m);
     var i;
     if (m === 'rain' || m === 'thunder') {
-      var n = Math.min(110, Math.round(w / 11));
+      var n = Math.min(160, Math.round(w / 7.5));
       for (i = 0; i < n; i++) {
         rainDrops.push({
           x: Math.random() * w, y: Math.random() * h,
-          len: 10 + Math.random() * 8,
-          v: 9 + Math.random() * 5,
+          len: 13 + Math.random() * 11,
+          v: 11 + Math.random() * 6,
           drift: 1 + Math.random() * 1.2
         });
       }
       nextFlash = performance.now() + 3000 + Math.random() * 5000;
     }
     if (m === 'snow') {
-      var s = Math.min(80, Math.round(w / 16));
+      var s = Math.min(130, Math.round(w / 10));
       for (i = 0; i < s; i++) {
         snowFlakes.push({
           x: Math.random() * w, y: Math.random() * h,
-          r: 1.2 + Math.random() * 2.2,
-          v: 0.6 + Math.random() * 1.1,
+          r: 1.5 + Math.random() * 2.8,
+          v: 0.8 + Math.random() * 1.4,
           phase: Math.random() * Math.PI * 2,
           spin: 0.008 + Math.random() * 0.012
         });
       }
     }
     if (m === 'cloudy' || m === 'overcast' || m === 'rain' || m === 'thunder') {
-      var counts = { cloudy: 6, overcast: 12, rain: 5, thunder: 7 };
+      var counts = { cloudy: 8, overcast: 15, rain: 6, thunder: 9 };
       for (i = 0; i < counts[m]; i++) {
         clouds.push({
           x: Math.random() * w,
           y: (m === 'rain' || m === 'thunder')
             ? 20 + Math.random() * h * 0.15
             : 30 + Math.random() * h * 0.5,
-          s: 0.7 + Math.random() * 1.1,
+          s: 0.9 + Math.random() * 1.4,
           v: 0.12 + Math.random() * 0.2
         });
       }
     }
     if (m === 'fog') {
-      for (i = 0; i < 8; i++) {
+      for (i = 0; i < 10; i++) {
         fogBands.push({
           x: Math.random() * w,
-          y: (i + 0.5) * (h / 8),
+          y: (i + 0.5) * (h / 10),
           v: 0.15 + Math.random() * 0.25,
           rw: w * (0.35 + Math.random() * 0.25)
         });
@@ -233,12 +233,12 @@
 
   function drawSun() {
     sunAngle += 0.0025;
-    var sx = w - 110, sy = 115, r = 36;
+    var sx = w - 120, sy = 125, r = 46;
     ctx.save();
     ctx.translate(sx, sy);
     ctx.rotate(sunAngle);
-    ctx.strokeStyle = 'rgba(240, 172, 50, 0.55)';
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(238, 166, 40, 0.75)';
+    ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.beginPath();
     for (var i = 0; i < 12; i++) {
@@ -249,8 +249,8 @@
     ctx.stroke();
     ctx.restore();
     var g = ctx.createRadialGradient(sx, sy, 4, sx, sy, r + 6);
-    g.addColorStop(0, 'rgba(246, 190, 70, 0.85)');
-    g.addColorStop(1, 'rgba(246, 190, 70, 0.15)');
+    g.addColorStop(0, 'rgba(246, 186, 55, 0.95)');
+    g.addColorStop(1, 'rgba(246, 186, 55, 0.22)');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(sx, sy, r, 0, 6.2832);
@@ -260,18 +260,18 @@
   function drawClouds() {
     /* a wash over the sky so grey days actually read as grey */
     if (mode === 'thunder') {
-      ctx.fillStyle = 'rgba(76, 84, 104, 0.2)';
+      ctx.fillStyle = 'rgba(76, 84, 104, 0.27)';
       ctx.fillRect(0, 0, w, h);
     } else if (mode === 'overcast') {
-      ctx.fillStyle = 'rgba(130, 138, 154, 0.12)';
+      ctx.fillStyle = 'rgba(130, 138, 154, 0.18)';
       ctx.fillRect(0, 0, w, h);
     } else if (mode === 'rain') {
-      ctx.fillStyle = 'rgba(120, 132, 150, 0.08)';
+      ctx.fillStyle = 'rgba(120, 132, 150, 0.13)';
       ctx.fillRect(0, 0, w, h);
     }
-    var col = mode === 'thunder' ? 'rgba(64, 72, 92, 0.5)'
-      : mode === 'overcast' ? 'rgba(105, 115, 135, 0.42)'
-      : 'rgba(140, 150, 170, 0.32)';
+    var col = mode === 'thunder' ? 'rgba(56, 64, 86, 0.6)'
+      : mode === 'overcast' ? 'rgba(96, 106, 128, 0.52)'
+      : 'rgba(128, 140, 162, 0.42)';
     ctx.fillStyle = col;
     for (var i = 0; i < clouds.length; i++) {
       var c = clouds[i];
@@ -286,21 +286,21 @@
   }
 
   function drawFog() {
-    ctx.fillStyle = 'rgba(148, 156, 172, 0.12)';
+    ctx.fillStyle = 'rgba(148, 156, 172, 0.2)';
     ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(164, 172, 188, 0.34)';
+    ctx.fillStyle = 'rgba(158, 166, 184, 0.45)';
     for (var i = 0; i < fogBands.length; i++) {
       var f = fogBands[i];
       f.x += f.v;
       if (f.x - f.rw > w) f.x = -f.rw;
       ctx.beginPath();
-      ctx.ellipse(f.x, f.y, f.rw, 52, 0, 0, 6.2832);
+      ctx.ellipse(f.x, f.y, f.rw, 64, 0, 0, 6.2832);
       ctx.fill();
     }
   }
 
   function drawRain() {
-    ctx.strokeStyle = 'rgba(96, 125, 158, 0.42)';
+    ctx.strokeStyle = 'rgba(86, 116, 152, 0.58)';
     ctx.lineWidth = 1.4;
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -316,7 +316,7 @@
   }
 
   function drawSnow() {
-    ctx.fillStyle = 'rgba(134, 152, 178, 0.55)';
+    ctx.fillStyle = 'rgba(120, 140, 170, 0.72)';
     for (var i = 0; i < snowFlakes.length; i++) {
       var f = snowFlakes[i];
       f.phase += f.spin;
@@ -335,7 +335,7 @@
     var now = performance.now();
     if (now > nextFlash) {
       flashA = 1;
-      nextFlash = now + 2800 + Math.random() * 4800;
+      nextFlash = now + 2200 + Math.random() * 3800;
       /* a fresh zigzag bolt from cloud height down half the screen */
       var bx = w * (0.15 + Math.random() * 0.7), by = 46;
       bolt = [[bx, by]];
@@ -348,7 +348,7 @@
     }
     if (flashA > 0.03) {
       /* on a light page a storm flash reads as a dark pulse, not a white one */
-      ctx.fillStyle = 'rgba(40, 46, 66, ' + (0.24 * flashA) + ')';
+      ctx.fillStyle = 'rgba(40, 46, 66, ' + (0.3 * flashA) + ')';
       ctx.fillRect(0, 0, w, h);
       if (bolt) {
         ctx.lineCap = 'round';
@@ -357,10 +357,10 @@
         ctx.moveTo(bolt[0][0], bolt[0][1]);
         for (var j = 1; j < bolt.length; j++) ctx.lineTo(bolt[j][0], bolt[j][1]);
         ctx.strokeStyle = 'rgba(250, 208, 80, ' + (0.38 * flashA) + ')';
-        ctx.lineWidth = 10;
+        ctx.lineWidth = 13;
         ctx.stroke();
         ctx.strokeStyle = 'rgba(255, 236, 160, ' + flashA + ')';
-        ctx.lineWidth = 3.5;
+        ctx.lineWidth = 4.5;
         ctx.stroke();
       }
       flashA *= 0.94;
