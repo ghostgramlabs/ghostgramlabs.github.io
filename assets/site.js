@@ -72,9 +72,37 @@
     return 'cloudy';
   }
 
+  var wxNotes = {
+    sunny: "It's <strong>sunny</strong> where you are — even our little guy brought his shades.",
+    cloudy: "<strong>Clouds</strong> over your town, clouds over our site.",
+    overcast: "<strong>Grey skies</strong> where you are. We matched the mood.",
+    fog: "<strong>Foggy</strong> out your window — foggy in here too.",
+    rain: "It's <strong>raining</strong> where you are — so it's raining here too.",
+    thunder: "<strong>Stormy</strong> at your place. Mind the lightning.",
+    snow: "It's <strong>snowing</strong> where you are — so it snows here too."
+  };
+
+  function showWxNote(m) {
+    if (!wxNotes[m]) return;
+    try { if (sessionStorage.getItem('gg-wx-note')) return; } catch (e) {}
+    setTimeout(function () {
+      var el = document.createElement('div');
+      el.className = 'wx-note';
+      el.setAttribute('role', 'status');
+      el.innerHTML = '<p>' + wxNotes[m] + ' <span class="wx-sub">Live from your sky, just for fun.</span></p>' +
+        '<button type="button" class="wx-close" aria-label="Dismiss">&times;</button>';
+      document.body.appendChild(el);
+      el.querySelector('.wx-close').addEventListener('click', function () {
+        el.remove();
+        try { sessionStorage.setItem('gg-wx-note', '1'); } catch (e) {}
+      });
+    }, 1500);
+  }
+
   function setupWeather(m, w, h) {
     mode = m;
     document.body.classList.add('weather-' + m);
+    showWxNote(m);
     var i;
     if (m === 'rain' || m === 'thunder') {
       var n = Math.min(160, Math.round(w / 7.5));
