@@ -345,7 +345,8 @@
   tick();
 })();
 
-/* ---------- Little runner: chases the pointer on desktop, walks with scroll on touch ---------- */
+/* ---------- Little runner: chases the pointer on desktop, walks with scroll on touch.
+   In rain/thunder/snow he shelters under page elements when idle; in sunshine he sunbathes. ---------- */
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) return;
@@ -368,9 +369,32 @@
     '</svg>';
   document.body.appendChild(man);
 
+  function badWeather() {
+    var c = document.body.classList;
+    return c.contains('weather-rain') || c.contains('weather-thunder') || c.contains('weather-snow');
+  }
+
+  function isSunny() {
+    return document.body.classList.contains('weather-sunny');
+  }
+
+  function findShelter(px, py) {
+    var els = document.querySelectorAll('.app-card, .feature, .value, .btn, .download-band, .faq details, .app-icon, h1, .section-title, .nav');
+    var best = null, bestD = Infinity;
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (r.width < 50 || r.bottom < 70) continue;
+      var sy = r.bottom + 38; /* his feet land here; head tucks just under the ledge */
+      if (sy > innerHeight - 6) continue;
+      var sx = Math.max(r.left + 14, Math.min(px, r.right - 14));
+      var d = (sx - px) * (sx - px) + (sy - py) * (sy - py);
+      if (d < bestD) { bestD = d; best = { x: sx, y: sy }; }
+    }
+    return best;
+  }
+
   if (window.matchMedia('(pointer: fine)').matches) {
-    /* desktop: he chases the mouse pointer — and in bad weather, when the
-       pointer rests, he runs under the nearest card/button/heading for shelter */
+    /* desktop: he chases the mouse pointer */
     var x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, dir = 1;
     var lastPointer = 0, shelter = null, lastShelterCalc = 0;
 
@@ -381,39 +405,19 @@
     });
     document.documentElement.addEventListener('mouseleave', function () { man.style.opacity = '0'; });
 
-    function badWeather() {
-      var c = document.body.classList;
-      return c.contains('weather-rain') || c.contains('weather-thunder') || c.contains('weather-snow');
-    }
-
-    function findShelter() {
-      var els = document.querySelectorAll('.app-card, .feature, .value, .btn, .download-band, .faq details, .app-icon, h1, .section-title, .nav');
-      var best = null, bestD = Infinity;
-      for (var i = 0; i < els.length; i++) {
-        var r = els[i].getBoundingClientRect();
-        if (r.width < 50 || r.bottom < 70) continue;
-        var sy = r.bottom + 38; /* his feet land here; head tucks just under the ledge */
-        if (sy > innerHeight - 6) continue;
-        var sx = Math.max(r.left + 14, Math.min(x, r.right - 14));
-        var d = (sx - x) * (sx - x) + (sy - y) * (sy - y);
-        if (d < bestD) { bestD = d; best = { x: sx, y: sy }; }
-      }
-      return best;
-    }
-
     (function chase() {
       var now = Date.now();
       var gx = tx, gy = ty;
       var sunbathing = false;
       if (badWeather() && now - lastPointer > 1400) {
         if (!shelter || now - lastShelterCalc > 450) {
-          shelter = findShelter() || shelter;
+          shelter = findShelter(x, y) || shelter;
           lastShelterCalc = now;
         }
         if (shelter) { gx = shelter.x; gy = shelter.y; }
       } else {
         shelter = null;
-        if (document.body.classList.contains('weather-sunny') && now - lastPointer > 2500) {
+        if (isSunny() && now - lastPointer > 2500) {
           /* nice weather, nothing to chase — time for a sunbath */
           gx = x; gy = y;
           sunbathing = true;
@@ -430,9 +434,12 @@
       requestAnimationFrame(chase);
     })();
   } else {
-    /* touch: he walks along the bottom edge as you scroll — left edge is the
-       top of the page, right edge is the bottom, so he doubles as a progress bar */
-    var wx = 16, wtx = 16, wdir = 1, lastY = window.scrollY, lastMove = 0;
+    /* touch: he walks along the bottom edge as you scroll (left = top of page,
+       right = bottom, a living progress bar). When you stop scrolling he reacts
+       to the weather: shelters under a card in rain/snow, sunbathes in sunshine. */
+    var wx = 16, wy = window.innerHeight - 8, wdir = 1;
+    var lastY = window.scrollY, lastMove = 0;
+    var mShelter = null, mShelterCalc = 0;
     man.style.opacity = '1';
 
     function walkTarget() {
@@ -440,26 +447,40 @@
       var p = max > 0 ? window.scrollY / max : 0;
       return 16 + p * (window.innerWidth - 32);
     }
-    wtx = walkTarget(); wx = wtx;
+    wx = walkTarget();
 
     window.addEventListener('scroll', function () {
       var s = window.scrollY;
       if (Math.abs(s - lastY) > 1) wdir = s >= lastY ? 1 : -1;
       lastY = s;
-      wtx = walkTarget();
       lastMove = Date.now();
     }, { passive: true });
-    window.addEventListener('resize', function () { wtx = walkTarget(); });
 
     (function walk() {
-      wx += (wtx - wx) * 0.1;
-      var idleFor = Date.now() - lastMove;
-      var moving = Math.abs(wtx - wx) > 0.8 || idleFor < 140;
+      var now = Date.now();
+      var idleFor = now - lastMove;
+      var gx, gy;
+      if (idleFor > 2500 && badWeather()) {
+        /* rain or snow and the reader has settled — run for cover */
+        if (!mShelter || now - mShelterCalc > 600) {
+          mShelter = findShelter(wx, wy) || mShelter;
+          mShelterCalc = now;
+        }
+      } else {
+        mShelter = null;
+      }
+      if (mShelter) { gx = mShelter.x; gy = mShelter.y; }
+      else { gx = walkTarget(); gy = window.innerHeight - 8; }
+
+      var dx = gx - wx, dy = gy - wy;
+      wx += dx * 0.1;
+      wy += dy * 0.1;
+      if (Math.abs(dx) > 1) wdir = dx > 0 ? 1 : -1;
+      var moving = Math.abs(dx) + Math.abs(dy) > 1.6 || idleFor < 140;
       man.classList.toggle('moving', moving);
       /* on a lazy sunny day with no scrolling, he lies down for a sunbath */
-      man.classList.toggle('sunbathe',
-        !moving && idleFor > 3000 && document.body.classList.contains('weather-sunny'));
-      man.style.transform = 'translate(' + wx + 'px,' + (window.innerHeight - 8) + 'px) translate(-50%,-100%) scaleX(' + wdir + ')';
+      man.classList.toggle('sunbathe', !moving && idleFor > 3000 && isSunny());
+      man.style.transform = 'translate(' + wx + 'px,' + wy + 'px) translate(-50%,-100%) scaleX(' + wdir + ')';
       requestAnimationFrame(walk);
     })();
   }
