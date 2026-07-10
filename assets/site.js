@@ -369,16 +369,51 @@
   document.body.appendChild(man);
 
   if (window.matchMedia('(pointer: fine)').matches) {
-    /* desktop: he chases the mouse pointer */
+    /* desktop: he chases the mouse pointer — and in bad weather, when the
+       pointer rests, he runs under the nearest card/button/heading for shelter */
     var x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, dir = 1;
+    var lastPointer = 0, shelter = null, lastShelterCalc = 0;
+
     window.addEventListener('pointermove', function (e) {
       tx = e.clientX; ty = e.clientY;
+      lastPointer = Date.now();
       man.style.opacity = '1';
     });
     document.documentElement.addEventListener('mouseleave', function () { man.style.opacity = '0'; });
 
+    function badWeather() {
+      var c = document.body.classList;
+      return c.contains('weather-rain') || c.contains('weather-thunder') || c.contains('weather-snow');
+    }
+
+    function findShelter() {
+      var els = document.querySelectorAll('.app-card, .feature, .value, .btn, .download-band, .faq details, .app-icon, h1, .section-title, .nav');
+      var best = null, bestD = Infinity;
+      for (var i = 0; i < els.length; i++) {
+        var r = els[i].getBoundingClientRect();
+        if (r.width < 50 || r.bottom < 70) continue;
+        var sy = r.bottom + 38; /* his feet land here; head tucks just under the ledge */
+        if (sy > innerHeight - 6) continue;
+        var sx = Math.max(r.left + 14, Math.min(x, r.right - 14));
+        var d = (sx - x) * (sx - x) + (sy - y) * (sy - y);
+        if (d < bestD) { bestD = d; best = { x: sx, y: sy }; }
+      }
+      return best;
+    }
+
     (function chase() {
-      var dx = tx - x, dy = ty - y;
+      var now = Date.now();
+      var gx = tx, gy = ty;
+      if (badWeather() && now - lastPointer > 1400) {
+        if (!shelter || now - lastShelterCalc > 450) {
+          shelter = findShelter() || shelter;
+          lastShelterCalc = now;
+        }
+        if (shelter) { gx = shelter.x; gy = shelter.y; }
+      } else {
+        shelter = null;
+      }
+      var dx = gx - x, dy = gy - y;
       x += dx * 0.07;
       y += dy * 0.07;
       var speed = Math.abs(dx) + Math.abs(dy);
