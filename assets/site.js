@@ -93,8 +93,8 @@
     tick();
   }
 
-  /* ---------- Little runner who chases the pointer (desktop only) ---------- */
-  if (window.matchMedia('(pointer: fine)').matches && !reduced) {
+  /* ---------- Little runner: chases the pointer on desktop, walks with scroll on touch ---------- */
+  if (!reduced) {
     var man = document.createElement('div');
     man.className = 'cursor-runner';
     man.setAttribute('aria-hidden', 'true');
@@ -109,23 +109,54 @@
       '</svg>';
     document.body.appendChild(man);
 
-    var x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, dir = 1;
-    window.addEventListener('pointermove', function (e) {
-      tx = e.clientX; ty = e.clientY;
-      man.style.opacity = '1';
-    });
-    document.documentElement.addEventListener('mouseleave', function () { man.style.opacity = '0'; });
+    if (window.matchMedia('(pointer: fine)').matches) {
+      /* desktop: he chases the mouse pointer */
+      var x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, dir = 1;
+      window.addEventListener('pointermove', function (e) {
+        tx = e.clientX; ty = e.clientY;
+        man.style.opacity = '1';
+      });
+      document.documentElement.addEventListener('mouseleave', function () { man.style.opacity = '0'; });
 
-    (function chase() {
-      var dx = tx - x, dy = ty - y;
-      x += dx * 0.07;
-      y += dy * 0.07;
-      var speed = Math.abs(dx) + Math.abs(dy);
-      if (Math.abs(dx) > 1) dir = dx > 0 ? 1 : -1;
-      man.classList.toggle('moving', speed > 8);
-      /* he trails behind and to the side, chasing the pointer */
-      man.style.transform = 'translate(' + x + 'px,' + y + 'px) translate(-50%,-110%) scaleX(' + dir + ')';
-      requestAnimationFrame(chase);
-    })();
+      (function chase() {
+        var dx = tx - x, dy = ty - y;
+        x += dx * 0.07;
+        y += dy * 0.07;
+        var speed = Math.abs(dx) + Math.abs(dy);
+        if (Math.abs(dx) > 1) dir = dx > 0 ? 1 : -1;
+        man.classList.toggle('moving', speed > 8);
+        man.style.transform = 'translate(' + x + 'px,' + y + 'px) translate(-50%,-110%) scaleX(' + dir + ')';
+        requestAnimationFrame(chase);
+      })();
+    } else {
+      /* touch: he walks along the bottom edge as you scroll — left edge is the
+         top of the page, right edge is the bottom, so he doubles as a progress bar */
+      var wx = 16, wtx = 16, wdir = 1, lastY = window.scrollY, lastMove = 0;
+      man.style.opacity = '1';
+
+      function walkTarget() {
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+        var p = max > 0 ? window.scrollY / max : 0;
+        return 16 + p * (window.innerWidth - 32);
+      }
+      wtx = walkTarget(); wx = wtx;
+
+      window.addEventListener('scroll', function () {
+        var s = window.scrollY;
+        if (Math.abs(s - lastY) > 1) wdir = s >= lastY ? 1 : -1;
+        lastY = s;
+        wtx = walkTarget();
+        lastMove = Date.now();
+      }, { passive: true });
+      window.addEventListener('resize', function () { wtx = walkTarget(); });
+
+      (function walk() {
+        wx += (wtx - wx) * 0.1;
+        var moving = Math.abs(wtx - wx) > 0.8 || Date.now() - lastMove < 140;
+        man.classList.toggle('moving', moving);
+        man.style.transform = 'translate(' + wx + 'px,' + (window.innerHeight - 8) + 'px) translate(-50%,-100%) scaleX(' + wdir + ')';
+        requestAnimationFrame(walk);
+      })();
+    }
   }
 })();
