@@ -404,6 +404,7 @@
     (function chase() {
       var now = Date.now();
       var gx = tx, gy = ty;
+      var sunbathing = false;
       if (badWeather() && now - lastPointer > 1400) {
         if (!shelter || now - lastShelterCalc > 450) {
           shelter = findShelter() || shelter;
@@ -412,6 +413,11 @@
         if (shelter) { gx = shelter.x; gy = shelter.y; }
       } else {
         shelter = null;
+        if (document.body.classList.contains('weather-sunny') && now - lastPointer > 2500) {
+          /* nice weather, nothing to chase — time for a sunbath */
+          gx = x; gy = y;
+          sunbathing = true;
+        }
       }
       var dx = gx - x, dy = gy - y;
       x += dx * 0.07;
@@ -419,6 +425,7 @@
       var speed = Math.abs(dx) + Math.abs(dy);
       if (Math.abs(dx) > 1) dir = dx > 0 ? 1 : -1;
       man.classList.toggle('moving', speed > 8);
+      man.classList.toggle('sunbathe', sunbathing && speed < 2);
       man.style.transform = 'translate(' + x + 'px,' + y + 'px) translate(-50%,-110%) scaleX(' + dir + ')';
       requestAnimationFrame(chase);
     })();
@@ -446,8 +453,12 @@
 
     (function walk() {
       wx += (wtx - wx) * 0.1;
-      var moving = Math.abs(wtx - wx) > 0.8 || Date.now() - lastMove < 140;
+      var idleFor = Date.now() - lastMove;
+      var moving = Math.abs(wtx - wx) > 0.8 || idleFor < 140;
       man.classList.toggle('moving', moving);
+      /* on a lazy sunny day with no scrolling, he lies down for a sunbath */
+      man.classList.toggle('sunbathe',
+        !moving && idleFor > 3000 && document.body.classList.contains('weather-sunny'));
       man.style.transform = 'translate(' + wx + 'px,' + (window.innerHeight - 8) + 'px) translate(-50%,-100%) scaleX(' + wdir + ')';
       requestAnimationFrame(walk);
     })();
