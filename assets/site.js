@@ -260,7 +260,7 @@
   function drawClouds() {
     /* a wash over the sky so grey days actually read as grey */
     if (mode === 'thunder') {
-      ctx.fillStyle = 'rgba(76, 84, 104, 0.14)';
+      ctx.fillStyle = 'rgba(76, 84, 104, 0.2)';
       ctx.fillRect(0, 0, w, h);
     } else if (mode === 'overcast') {
       ctx.fillStyle = 'rgba(130, 138, 154, 0.12)';
@@ -334,32 +334,36 @@
   function drawFlash() {
     var now = performance.now();
     if (now > nextFlash) {
-      flashA = 0.22;
-      nextFlash = now + 3500 + Math.random() * 5500;
-      /* draw a fresh zigzag bolt from cloud height */
-      var bx = w * (0.15 + Math.random() * 0.7), by = 40;
+      flashA = 1;
+      nextFlash = now + 2800 + Math.random() * 4800;
+      /* a fresh zigzag bolt from cloud height down half the screen */
+      var bx = w * (0.15 + Math.random() * 0.7), by = 46;
       bolt = [[bx, by]];
-      var steps = 5 + Math.floor(Math.random() * 3);
+      var steps = 6 + Math.floor(Math.random() * 3);
       for (var i = 0; i < steps; i++) {
-        bx += (Math.random() - 0.5) * 70;
-        by += h * 0.07 + Math.random() * h * 0.05;
+        bx += (Math.random() - 0.5) * 76;
+        by += h * 0.06 + Math.random() * h * 0.045;
         bolt.push([bx, by]);
       }
     }
-    if (flashA > 0.006) {
-      ctx.fillStyle = 'rgba(255, 250, 225, ' + flashA + ')';
+    if (flashA > 0.03) {
+      /* on a light page a storm flash reads as a dark pulse, not a white one */
+      ctx.fillStyle = 'rgba(40, 46, 66, ' + (0.24 * flashA) + ')';
       ctx.fillRect(0, 0, w, h);
       if (bolt) {
-        ctx.strokeStyle = 'rgba(240, 190, 70, ' + Math.min(1, flashA * 5) + ')';
-        ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.beginPath();
         ctx.moveTo(bolt[0][0], bolt[0][1]);
         for (var j = 1; j < bolt.length; j++) ctx.lineTo(bolt[j][0], bolt[j][1]);
+        ctx.strokeStyle = 'rgba(250, 208, 80, ' + (0.38 * flashA) + ')';
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 236, 160, ' + flashA + ')';
+        ctx.lineWidth = 3.5;
         ctx.stroke();
       }
-      flashA *= 0.88;
+      flashA *= 0.94;
     } else {
       bolt = null;
     }
@@ -433,6 +437,7 @@
     /* desktop: he chases the mouse pointer */
     var x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, dir = 1;
     var lastPointer = 0, shelter = null, lastShelterCalc = 0;
+    var wander = null, nextWander = 0;
 
     window.addEventListener('pointermove', function (e) {
       tx = e.clientX; ty = e.clientY;
@@ -457,6 +462,18 @@
           /* nice weather, nothing to chase — time for a sunbath */
           gx = x; gy = y;
           sunbathing = true;
+        } else if (now - lastPointer > 3000) {
+          /* nothing to chase, no weather to react to — he goes for a stroll */
+          if (now > nextWander) {
+            nextWander = now + 2600 + Math.random() * 2800;
+            wander = {
+              x: Math.max(24, Math.min(innerWidth - 24, x + (Math.random() - 0.5) * 280)),
+              y: Math.max(80, Math.min(innerHeight - 24, y + (Math.random() - 0.5) * 150))
+            };
+          }
+          if (wander) { gx = wander.x; gy = wander.y; }
+        } else {
+          wander = null; nextWander = 0;
         }
       }
       var dx = gx - x, dy = gy - y;
@@ -476,6 +493,7 @@
     var wx = 16, wy = window.innerHeight - 8, wdir = 1;
     var lastY = window.scrollY, lastMove = 0;
     var mShelter = null, mShelterCalc = 0;
+    var mWander = null, mNextWander = 0;
     man.style.opacity = '1';
 
     function walkTarget() {
@@ -506,7 +524,16 @@
         mShelter = null;
       }
       if (mShelter) { gx = mShelter.x; gy = mShelter.y; }
-      else { gx = walkTarget(); gy = window.innerHeight - 8; }
+      else if (idleFor > 3000 && !isSunny()) {
+        /* nothing happening — he paces along the bottom edge */
+        if (now > mNextWander) {
+          mNextWander = now + 2600 + Math.random() * 2800;
+          mWander = Math.max(14, Math.min(window.innerWidth - 14, walkTarget() + (Math.random() - 0.5) * 180));
+        }
+        gx = mWander !== null ? mWander : walkTarget();
+        gy = window.innerHeight - 8;
+      }
+      else { mWander = null; mNextWander = 0; gx = walkTarget(); gy = window.innerHeight - 8; }
 
       var dx = gx - wx, dy = gy - wy;
       wx += dx * 0.1;
