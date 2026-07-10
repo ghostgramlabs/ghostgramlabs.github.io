@@ -55,6 +55,57 @@
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* ---------- Weather mode: rain/snow at the visitor's location changes the scenery ---------- */
+  var weatherMode = 'icons';
+  var rainDrops = [], snowFlakes = [];
+
+  function setupWeather(mode, w, h) {
+    weatherMode = mode;
+    document.body.classList.add('weather-' + mode);
+    if (mode === 'rain') {
+      var n = Math.min(110, Math.round(w / 11));
+      for (var i = 0; i < n; i++) {
+        rainDrops.push({
+          x: Math.random() * w, y: Math.random() * h,
+          len: 10 + Math.random() * 8,
+          v: 9 + Math.random() * 5,
+          drift: 1 + Math.random() * 1.2
+        });
+      }
+    } else if (mode === 'snow') {
+      var m = Math.min(80, Math.round(w / 16));
+      for (var j = 0; j < m; j++) {
+        snowFlakes.push({
+          x: Math.random() * w, y: Math.random() * h,
+          r: 1.2 + Math.random() * 2.2,
+          v: 0.6 + Math.random() * 1.1,
+          phase: Math.random() * Math.PI * 2,
+          spin: 0.008 + Math.random() * 0.012
+        });
+      }
+    }
+  }
+
+  if (!reduced && window.fetch) {
+    fetch('https://ipwho.is/?fields=success,latitude,longitude')
+      .then(function (r) { return r.json(); })
+      .then(function (loc) {
+        if (!loc || !loc.success) return null;
+        return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + loc.latitude +
+          '&longitude=' + loc.longitude + '&current=weather_code')
+          .then(function (r) { return r.json(); });
+      })
+      .then(function (wx) {
+        if (!wx || !wx.current) return;
+        var c = wx.current.weather_code;
+        var rain = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
+        var snow = [71, 73, 75, 77, 85, 86];
+        if (rain.indexOf(c) > -1) setupWeather('rain', innerWidth, innerHeight);
+        else if (snow.indexOf(c) > -1) setupWeather('snow', innerWidth, innerHeight);
+      })
+      .catch(function () { /* no weather — keep the floating icons */ });
+  }
+
   /* ---------- App icons drifting behind the page, scattering from the pointer ---------- */
   if (!reduced) {
     var canvas = document.createElement('canvas');
@@ -114,8 +165,41 @@
     window.addEventListener('pointermove', function (e) { mx = e.clientX; my = e.clientY; });
     document.documentElement.addEventListener('mouseleave', function () { mx = -9999; my = -9999; });
 
+    function drawRain() {
+      ctx.strokeStyle = 'rgba(96, 125, 158, 0.42)';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (var i = 0; i < rainDrops.length; i++) {
+        var d = rainDrops[i];
+        d.y += d.v; d.x += d.drift;
+        if (d.y - d.len > h) { d.y = -d.len; d.x = Math.random() * w; }
+        if (d.x > w + 20) d.x = -20;
+        ctx.moveTo(d.x, d.y);
+        ctx.lineTo(d.x - d.drift * 1.6, d.y - d.len);
+      }
+      ctx.stroke();
+    }
+
+    function drawSnow() {
+      ctx.fillStyle = 'rgba(134, 152, 178, 0.55)';
+      for (var i = 0; i < snowFlakes.length; i++) {
+        var f = snowFlakes[i];
+        f.phase += f.spin;
+        f.y += f.v;
+        f.x += Math.sin(f.phase) * 0.6;
+        if (f.y - f.r > h) { f.y = -f.r; f.x = Math.random() * w; }
+        if (f.x > w + 10) f.x = -10; if (f.x < -10) f.x = w + 10;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, 6.2832);
+        ctx.fill();
+      }
+    }
+
     function tick() {
       ctx.clearRect(0, 0, w, h);
+      if (weatherMode === 'rain') { drawRain(); requestAnimationFrame(tick); return; }
+      if (weatherMode === 'snow') { drawSnow(); requestAnimationFrame(tick); return; }
       for (var i = 0; i < things.length; i++) {
         var t = things[i];
         var dx = t.x - mx, dy = t.y - my, d2 = dx * dx + dy * dy;
@@ -159,6 +243,9 @@
       '<line class="arm a2" x1="12" y1="11.5" x2="17" y2="16"/>' +
       '<line class="leg l1" x1="12" y1="19" x2="8" y2="29"/>' +
       '<line class="leg l2" x1="12" y1="19" x2="16" y2="29"/>' +
+      '<g class="umbrella"><line x1="16" y1="16" x2="16" y2="1.5"/>' +
+      '<path class="canopy" d="M6 3.5 Q16 -6 26 3.5 Q22.7 1.4 19.3 3.5 Q16 1.4 12.7 3.5 Q9.3 1.4 6 3.5 Z"/></g>' +
+      '<g class="beanie"><path d="M8.4 4.4 A3.6 3.6 0 0 1 15.6 4.4 Z"/><circle cx="12" cy="0.7" r="1.3"/></g>' +
       '</svg>';
     document.body.appendChild(man);
 

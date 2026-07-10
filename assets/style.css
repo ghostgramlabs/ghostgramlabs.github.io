@@ -164,6 +164,31 @@ header {
 .cursor-runner .arm { transform-box: view-box; transform-origin: 12px 11.5px; }
 .cursor-runner .leg { transform-box: view-box; transform-origin: 12px 19px; }
 
+/* weather outfits: umbrella in rain, beanie in snow */
+.cursor-runner .umbrella,
+.cursor-runner .beanie { display: none; }
+
+body.weather-rain .cursor-runner .umbrella { display: block; }
+body.weather-snow .cursor-runner .beanie { display: block; }
+
+.cursor-runner .umbrella line { stroke-width: 1.8; }
+
+.cursor-runner .umbrella .canopy {
+  fill: var(--accent);
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+
+.cursor-runner .beanie path {
+  fill: var(--accent);
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+
+.cursor-runner .beanie circle { fill: var(--ink); }
+
+body.weather-rain .cursor-runner .a2 { display: none; } /* that hand is holding the umbrella */
+
 .cursor-runner.moving svg { animation: gg-bob 0.36s ease-in-out infinite; }
 .cursor-runner.moving .l1 { animation: gg-swing-big 0.36s linear infinite; }
 .cursor-runner.moving .l2 { animation: gg-swing-big 0.36s linear infinite; animation-delay: -0.18s; }
