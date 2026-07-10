@@ -164,12 +164,24 @@ header {
 .cursor-runner .arm { transform-box: view-box; transform-origin: 12px 11.5px; }
 .cursor-runner .leg { transform-box: view-box; transform-origin: 12px 19px; }
 
-/* weather outfits: umbrella in rain, beanie in snow */
+/* weather outfits: umbrella in rain/thunder, beanie in snow, sunglasses when sunny */
 .cursor-runner .umbrella,
-.cursor-runner .beanie { display: none; }
+.cursor-runner .beanie,
+.cursor-runner .shades { display: none; }
 
-body.weather-rain .cursor-runner .umbrella { display: block; }
+body.weather-rain .cursor-runner .umbrella,
+body.weather-thunder .cursor-runner .umbrella { display: block; }
+
 body.weather-snow .cursor-runner .beanie { display: block; }
+
+body.weather-sunny .cursor-runner .shades { display: block; }
+
+.cursor-runner .shades line { stroke-width: 1.3; }
+
+.cursor-runner .shades circle {
+  fill: var(--ink);
+  stroke: none;
+}
 
 .cursor-runner .umbrella line { stroke-width: 1.8; }
 
@@ -187,7 +199,8 @@ body.weather-snow .cursor-runner .beanie { display: block; }
 
 .cursor-runner .beanie circle { fill: var(--ink); }
 
-body.weather-rain .cursor-runner .a2 { display: none; } /* that hand is holding the umbrella */
+body.weather-rain .cursor-runner .a2,
+body.weather-thunder .cursor-runner .a2 { display: none; } /* that hand is holding the umbrella */
 
 .cursor-runner.moving svg { animation: gg-bob 0.36s ease-in-out infinite; }
 .cursor-runner.moving .l1 { animation: gg-swing-big 0.36s linear infinite; }
