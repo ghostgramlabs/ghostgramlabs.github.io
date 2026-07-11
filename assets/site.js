@@ -158,12 +158,32 @@
   if (forced) {
     setupWeather(forced[1], innerWidth, innerHeight);
   } else if (window.fetch) {
-    fetch('https://ipwho.is/?fields=success,latitude,longitude')
-      .then(function (r) { return r.json(); })
+    /* three free keyless geo services, tried in order — if one is down the next answers */
+    var geoSources = [
+      { url: 'https://get.geojs.io/v1/ip/geo.json',
+        parse: function (j) { return { lat: parseFloat(j.latitude), lon: parseFloat(j.longitude) }; } },
+      { url: 'https://ipwho.is/?fields=success,latitude,longitude',
+        parse: function (j) { return j.success ? { lat: j.latitude, lon: j.longitude } : null; } },
+      { url: 'https://ipapi.co/json/',
+        parse: function (j) { return { lat: j.latitude, lon: j.longitude }; } }
+    ];
+
+    function getLocation(i) {
+      if (i >= geoSources.length) return Promise.reject(new Error('no geo'));
+      return fetch(geoSources[i].url)
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          var p = geoSources[i].parse(j);
+          if (p && isFinite(p.lat) && isFinite(p.lon)) return p;
+          throw new Error('bad geo');
+        })
+        .catch(function () { return getLocation(i + 1); });
+    }
+
+    getLocation(0)
       .then(function (loc) {
-        if (!loc || !loc.success) return null;
-        return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + loc.latitude +
-          '&longitude=' + loc.longitude + '&current=weather_code')
+        return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + loc.lat +
+          '&longitude=' + loc.lon + '&current=weather_code')
           .then(function (r) { return r.json(); });
       })
       .then(function (wx) {
