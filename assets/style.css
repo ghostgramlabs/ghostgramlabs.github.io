@@ -809,7 +809,8 @@ footer {
   margin-top: 4px;
 }
 
-.wx-note .wx-fix { color: var(--accent); }
+.wx-note .wx-fix,
+.wx-note .wx-pick { color: var(--accent); }
 
 .wx-note .wx-close {
   background: none;

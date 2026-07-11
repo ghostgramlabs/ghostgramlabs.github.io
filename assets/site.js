@@ -83,6 +83,7 @@
   };
 
   var usedPrecise = false;
+  var manualPick = false;
 
   function showWxNote(m) {
     if (!wxNotes[m]) return;
@@ -93,9 +94,10 @@
       var el = document.createElement('div');
       el.className = 'wx-note';
       el.setAttribute('role', 'status');
-      var fixLink = (navigator.geolocation && !usedPrecise)
+      var fixLink = (navigator.geolocation && !usedPrecise && !manualPick)
         ? ' <a href="#" class="wx-fix">Wrong? Use my exact spot</a>' : '';
-      el.innerHTML = '<p>' + wxNotes[m] + ' <span class="wx-sub">Live from your sky, just for fun.' + fixLink + '</span></p>' +
+      var pickLink = ' <a href="#" class="wx-pick">Or pick the sky yourself.</a>';
+      el.innerHTML = '<p>' + wxNotes[m] + ' <span class="wx-sub">Live from your sky, just for fun.' + fixLink + pickLink + '</span></p>' +
         '<button type="button" class="wx-close" aria-label="Dismiss">&times;</button>';
       document.body.appendChild(el);
       el.querySelector('.wx-close').addEventListener('click', function () {
@@ -111,7 +113,15 @@
           fetchWeatherFor(pos.coords.latitude, pos.coords.longitude);
         }, function () {}, { timeout: 9000, maximumAge: 300000 });
       });
-    }, 1500);
+      var pick = el.querySelector('.wx-pick');
+      if (pick) pick.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        var order = ['sunny', 'cloudy', 'overcast', 'fog', 'rain', 'thunder', 'snow'];
+        var next = order[(order.indexOf(mode) + 1) % order.length];
+        manualPick = true;
+        setupWeather(next, innerWidth, innerHeight);
+      });
+    }, manualPick ? 120 : 1500);
   }
 
   function clearWeather() {
