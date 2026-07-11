@@ -82,24 +82,47 @@
     snow: "It's <strong>snowing</strong> where you are — so it snows here too."
   };
 
+  var usedPrecise = false;
+
   function showWxNote(m) {
     if (!wxNotes[m]) return;
     try { if (sessionStorage.getItem('gg-wx-note')) return; } catch (e) {}
     setTimeout(function () {
+      var stale = document.querySelector('.wx-note');
+      if (stale) stale.remove();
       var el = document.createElement('div');
       el.className = 'wx-note';
       el.setAttribute('role', 'status');
-      el.innerHTML = '<p>' + wxNotes[m] + ' <span class="wx-sub">Live from your sky, just for fun.</span></p>' +
+      var fixLink = (navigator.geolocation && !usedPrecise)
+        ? ' <a href="#" class="wx-fix">Wrong? Use my exact spot</a>' : '';
+      el.innerHTML = '<p>' + wxNotes[m] + ' <span class="wx-sub">Live from your sky, just for fun.' + fixLink + '</span></p>' +
         '<button type="button" class="wx-close" aria-label="Dismiss">&times;</button>';
       document.body.appendChild(el);
       el.querySelector('.wx-close').addEventListener('click', function () {
         el.remove();
         try { sessionStorage.setItem('gg-wx-note', '1'); } catch (e) {}
       });
+      var fix = el.querySelector('.wx-fix');
+      if (fix) fix.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          usedPrecise = true;
+          el.remove();
+          fetchWeatherFor(pos.coords.latitude, pos.coords.longitude);
+        }, function () {}, { timeout: 9000, maximumAge: 300000 });
+      });
     }, 1500);
   }
 
+  function clearWeather() {
+    rainDrops.length = 0; snowFlakes.length = 0; clouds.length = 0; fogBands.length = 0;
+    ['sunny', 'cloudy', 'overcast', 'fog', 'rain', 'thunder', 'snow'].forEach(function (c) {
+      document.body.classList.remove('weather-' + c);
+    });
+  }
+
   function setupWeather(m, w, h) {
+    clearWeather();
     mode = m;
     document.body.classList.add('weather-' + m);
     showWxNote(m);
@@ -153,6 +176,24 @@
     }
   }
 
+  function fetchWeatherFor(lat, lon) {
+    return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat +
+      '&longitude=' + lon + '&current=weather_code,precipitation,rain,showers,snowfall')
+      .then(function (r) { return r.json(); })
+      .then(function (wx) {
+        if (!wx || !wx.current) return;
+        var cur = wx.current;
+        var m = codeToMode(cur.weather_code);
+        /* trust measured precipitation over the coded summary — models lag on scattered showers */
+        if ((cur.snowfall || 0) > 0) m = 'snow';
+        else if ((cur.precipitation || 0) > 0.05 || (cur.rain || 0) > 0 || (cur.showers || 0) > 0) {
+          if (m !== 'thunder') m = 'rain';
+        }
+        setupWeather(m, innerWidth, innerHeight);
+      })
+      .catch(function () { /* no weather — keep the floating icons */ });
+  }
+
   /* preview override for testing: ?weather=sunny|cloudy|overcast|fog|rain|thunder|snow */
   var forced = /[?&]weather=(sunny|cloudy|overcast|fog|rain|thunder|snow)/.exec(location.search);
   if (forced) {
@@ -181,15 +222,7 @@
     }
 
     getLocation(0)
-      .then(function (loc) {
-        return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + loc.lat +
-          '&longitude=' + loc.lon + '&current=weather_code')
-          .then(function (r) { return r.json(); });
-      })
-      .then(function (wx) {
-        if (!wx || !wx.current) return;
-        setupWeather(codeToMode(wx.current.weather_code), innerWidth, innerHeight);
-      })
+      .then(function (loc) { return fetchWeatherFor(loc.lat, loc.lon); })
       .catch(function () { /* no weather — keep the floating icons */ });
   }
 
