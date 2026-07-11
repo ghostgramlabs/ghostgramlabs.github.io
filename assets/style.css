@@ -285,11 +285,10 @@ h1 {
   font-weight: 600;
   letter-spacing: 0;
   color: var(--accent);
-  background: var(--tint);
-  padding: 0 0.14em;
-  border-radius: 8px;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  text-decoration: underline wavy;
+  text-decoration-thickness: 0.05em;
+  text-underline-offset: 0.14em;
+  text-decoration-skip-ink: none;
 }
 
 .hero p.lead {
