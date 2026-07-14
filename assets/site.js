@@ -417,7 +417,7 @@
         y: h * (0.08 + Math.random() * 0.3),
         vx: (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random()),
         ph: Math.random() * Math.PI * 2,
-        s: 5 + Math.random() * 2.5
+        s: 6.5 + Math.random() * 3
       });
     }
     butterflies = [];
@@ -467,11 +467,9 @@
   }
 
   function drawBats() {
-    ctx.strokeStyle = 'rgba(44, 38, 54, 0.6)';
-    ctx.lineWidth = 1.7;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
+    /* filled silhouettes — a smooth arched top edge and a scalloped bottom edge
+       is the shape everyone knows as "bat"; strokes at this size read ambiguous */
+    ctx.fillStyle = 'rgba(44, 38, 54, 0.65)';
     for (var i = 0; i < bats.length; i++) {
       var b = bats[i];
       b.ph += 0.32;
@@ -479,14 +477,18 @@
       b.y += Math.cos(b.ph * 0.31) * 1.1;
       if (b.x < -30) b.x = w + 30; if (b.x > w + 30) b.x = -30;
       if (b.y < 20) b.y = 20; if (b.y > h * 0.5) b.y = h * 0.5;
-      /* scalloped bat wings: tips up, membrane sagging toward the body, a little head bump */
-      var flap = (0.3 + 0.7 * Math.abs(Math.sin(b.ph))) * b.s * 0.9;
-      ctx.moveTo(b.x - b.s, b.y - flap);
-      ctx.quadraticCurveTo(b.x - b.s * 0.55, b.y + flap * 0.3, b.x - b.s * 0.18, b.y - b.s * 0.12);
-      ctx.quadraticCurveTo(b.x, b.y - b.s * 0.45, b.x + b.s * 0.18, b.y - b.s * 0.12);
-      ctx.quadraticCurveTo(b.x + b.s * 0.55, b.y + flap * 0.3, b.x + b.s, b.y - flap);
+      var f = (0.25 + 0.75 * Math.abs(Math.sin(b.ph))) * b.s * 0.7; /* wingtip lift */
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y - b.s * 0.32);
+      ctx.quadraticCurveTo(b.x - b.s * 0.5, b.y - f - b.s * 0.28, b.x - b.s, b.y - f);
+      ctx.quadraticCurveTo(b.x - b.s * 0.68, b.y - f * 0.1 + b.s * 0.08, b.x - b.s * 0.42, b.y - f * 0.25);
+      ctx.quadraticCurveTo(b.x - b.s * 0.2, b.y + b.s * 0.12, b.x, b.y + b.s * 0.18);
+      ctx.quadraticCurveTo(b.x + b.s * 0.2, b.y + b.s * 0.12, b.x + b.s * 0.42, b.y - f * 0.25);
+      ctx.quadraticCurveTo(b.x + b.s * 0.68, b.y - f * 0.1 + b.s * 0.08, b.x + b.s, b.y - f);
+      ctx.quadraticCurveTo(b.x + b.s * 0.5, b.y - f - b.s * 0.28, b.x, b.y - b.s * 0.32);
+      ctx.closePath();
+      ctx.fill();
     }
-    ctx.stroke();
   }
 
   function drawButterflies() {
