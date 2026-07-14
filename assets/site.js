@@ -52,6 +52,82 @@
   }
 })();
 
+/* ---------- Time-of-day sky: morning, day, evening, night ---------- */
+(function () {
+  var SKIES = ['morning', 'day', 'evening', 'night'];
+  var THEME = { morning: '#fcf4dd', day: '#faf6ee', evening: '#f8ece3', night: '#15141d' };
+  var manual = null;
+  var daylight = null; /* from the weather API: 1 = sun is up, 0 = sun is down, null = not heard yet */
+
+  function byClock() {
+    var hr = new Date().getHours();
+    if (hr >= 5 && hr < 10) return 'morning';
+    if (hr >= 10 && hr < 17) return 'day';
+    if (hr >= 17 && hr < 20) return 'evening';
+    return 'night';
+  }
+
+  /* the clock picks the flavor, but the real sun (via the weather API) decides day vs night */
+  function pick() {
+    if (manual) return manual;
+    var p = byClock();
+    if (daylight === 0) return 'night';
+    if (daylight === 1 && p === 'night') return 'evening';
+    return p;
+  }
+
+  function apply(p) {
+    SKIES.forEach(function (s) { document.body.classList.remove('sky-' + s); });
+    document.body.classList.add('sky-' + p);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', THEME[p]);
+  }
+
+  /* little line icons for the nav toggle, one per sky (plus "live") */
+  var ICONS = {
+    morning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.2" y1="10.2" x2="5.6" y2="11.6"/><line x1="19.8" y1="10.2" x2="18.4" y2="11.6"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="8" y1="22" x2="16" y2="22"/><polyline points="8 6 12 2 16 6"/></svg>',
+    day: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+    evening: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.2" y1="10.2" x2="5.6" y2="11.6"/><line x1="19.8" y1="10.2" x2="18.4" y2="11.6"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="8" y1="22" x2="16" y2="22"/><polyline points="16 5 12 9 8 5"/></svg>',
+    night: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+  };
+
+  function remember(p) {
+    try {
+      if (p) sessionStorage.setItem('gg-sky', p);
+      else sessionStorage.removeItem('gg-sky');
+    } catch (e) {}
+  }
+
+  /* preview override for testing: ?sky=morning|day|evening|night */
+  var forced = /[?&]sky=(morning|day|evening|night)/.exec(location.search);
+  if (forced) manual = forced[1];
+  else {
+    /* a sky picked earlier this visit follows the reader between pages */
+    try { manual = sessionStorage.getItem('gg-sky') || null; } catch (e) {}
+    if (SKIES.indexOf(manual) < 0) manual = null;
+  }
+  apply(pick());
+
+  /* keep up with the clock so the page dims as the visitor's evening arrives */
+  setInterval(function () { apply(pick()); }, 60000);
+
+  window.ggSky = {
+    icons: ICONS,
+    get: function () {
+      for (var i = 0; i < SKIES.length; i++) {
+        if (document.body.classList.contains('sky-' + SKIES[i])) return SKIES[i];
+      }
+      return 'day';
+    },
+    pinned: function () { return manual; },
+    set: function (p) { manual = p; remember(p); apply(pick()); },
+    syncDaylight: function (d) {
+      daylight = (d === 0 || d === 1) ? d : null;
+      apply(pick());
+    }
+  };
+})();
+
 /* ---------- Weather scenery + floating app icons ---------- */
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -73,7 +149,7 @@
   }
 
   var wxNotes = {
-    sunny: "It's <strong>sunny</strong> where you are — even our little guy brought his shades.",
+    sunny: "It's <strong>sunny</strong> where you are — even Gram, our little guy, brought his shades.",
     cloudy: "<strong>Clouds</strong> over your town, clouds over our site.",
     overcast: "<strong>Grey skies</strong> where you are. We matched the mood.",
     fog: "<strong>Foggy</strong> out your window — foggy in here too.",
@@ -82,27 +158,64 @@
     snow: "It's <strong>snowing</strong> where you are — so it snows here too."
   };
 
+  /* at night the "sunny" weather code just means a clear sky — say so */
+  var wxNightNotes = {
+    sunny: "A <strong>clear night</strong> where you are — so the moon came out here too.",
+    cloudy: "<strong>Cloudy night</strong> over your town — same moody sky in here."
+  };
+
   var usedPrecise = false;
   var manualPick = false;
+  var noteTucked = /[?&]wxhide=1/.test(location.search); /* only × and the tab ever change this */
 
-  function showWxNote(m) {
+  function skyNow() {
+    return (window.ggSky && window.ggSky.get()) || 'day';
+  }
+
+  function showWxNote(m, fast) {
     if (!wxNotes[m]) return;
-    try { if (sessionStorage.getItem('gg-wx-note')) return; } catch (e) {}
+    /* the note opens expanded and stays open until someone clicks ×; a rebuild
+       (weather update, sky pick) keeps whatever state the reader chose.
+       Testing override: ?wxhide=1 starts it tucked */
+    var collapsed = noteTucked;
     setTimeout(function () {
       var stale = document.querySelector('.wx-note');
       if (stale) stale.remove();
       var el = document.createElement('div');
-      el.className = 'wx-note';
+      el.className = 'wx-note' + (collapsed ? ' wx-hidden' : '');
       el.setAttribute('role', 'status');
+      var night = skyNow() === 'night';
+      var noteText = (night && wxNightNotes[m]) ? wxNightNotes[m] : wxNotes[m];
       var fixLink = (navigator.geolocation && !usedPrecise && !manualPick)
         ? ' <a href="#" class="wx-fix">Wrong? Use my exact spot</a>' : '';
-      var pickLink = ' <a href="#" class="wx-pick">Or pick the sky yourself.</a>';
-      el.innerHTML = '<p>' + wxNotes[m] + ' <span class="wx-sub">Live from your sky, just for fun.' + fixLink + pickLink + '</span></p>' +
-        '<button type="button" class="wx-close" aria-label="Dismiss">&times;</button>';
+      var pickLink = ' <a href="#" class="wx-pick">Or pick the weather yourself.</a>';
+      /* time-of-day buttons: morning / day / evening / night, plus "live" to follow the real sun */
+      var skyRow = '';
+      if (window.ggSky) {
+        var skies = ['morning', 'day', 'evening', 'night'];
+        var cur = skyNow();
+        var pinned = window.ggSky.pinned();
+        skyRow = '<span class="wx-skyrow" role="group" aria-label="Change the time of day">';
+        for (var si = 0; si < skies.length; si++) {
+          skyRow += '<button type="button" class="wx-skybtn' + (pinned === skies[si] ? ' on' : '') +
+            '" data-sky="' + skies[si] + '" title="' + skies[si] + '" aria-label="Switch to ' + skies[si] + '">' +
+            window.ggSky.icons[skies[si]] + '</button>';
+        }
+        skyRow += '<button type="button" class="wx-skybtn wx-skylive' + (!pinned ? ' on' : '') +
+          '" data-sky="" title="follow your real sky (' + cur + ' now)" aria-label="Follow your real sky">live</button></span>';
+      }
+      var tabIcon = (window.ggSky && window.ggSky.icons[skyNow()]) || '&#9728;';
+      el.innerHTML = '<p>' + noteText + ' <span class="wx-sub">Live from your sky, just for fun.' + fixLink + pickLink + '</span>' + skyRow + '</p>' +
+        '<button type="button" class="wx-close" aria-label="Tuck away">&times;</button>' +
+        '<button type="button" class="wx-tab" aria-label="Weather &amp; sky options" title="Weather &amp; sky">' + tabIcon + '</button>';
       document.body.appendChild(el);
       el.querySelector('.wx-close').addEventListener('click', function () {
-        el.remove();
-        try { sessionStorage.setItem('gg-wx-note', '1'); } catch (e) {}
+        noteTucked = true;
+        el.classList.add('wx-hidden');
+      });
+      el.querySelector('.wx-tab').addEventListener('click', function () {
+        noteTucked = false;
+        el.classList.remove('wx-hidden');
       });
       var fix = el.querySelector('.wx-fix');
       if (fix) fix.addEventListener('click', function (ev) {
@@ -121,7 +234,16 @@
         manualPick = true;
         setupWeather(next, innerWidth, innerHeight);
       });
-    }, manualPick ? 120 : 1500);
+      var sbs = el.querySelectorAll('.wx-skybtn');
+      for (var bi = 0; bi < sbs.length; bi++) {
+        (function (btnEl) {
+          btnEl.addEventListener('click', function () {
+            if (window.ggSky) window.ggSky.set(btnEl.getAttribute('data-sky') || null);
+            showWxNote(mode, true);
+          });
+        })(sbs[bi]);
+      }
+    }, (fast || collapsed) ? 120 : 1500);
   }
 
   function clearWeather() {
@@ -135,7 +257,7 @@
     clearWeather();
     mode = m;
     document.body.classList.add('weather-' + m);
-    showWxNote(m);
+    showWxNote(m, manualPick);
     var i;
     if (m === 'rain' || m === 'thunder') {
       var n = Math.min(160, Math.round(w / 7.5));
@@ -188,11 +310,14 @@
 
   function fetchWeatherFor(lat, lon) {
     return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat +
-      '&longitude=' + lon + '&current=weather_code,precipitation,rain,showers,snowfall')
+      '&longitude=' + lon + '&current=weather_code,precipitation,rain,showers,snowfall,is_day')
       .then(function (r) { return r.json(); })
       .then(function (wx) {
         if (!wx || !wx.current) return;
         var cur = wx.current;
+        /* let the sky follow the real sun at the visitor's spot, not just their clock —
+           sync before setupWeather so the note and canvas agree on day vs night */
+        if (window.ggSky && typeof cur.is_day !== 'undefined') window.ggSky.syncDaylight(cur.is_day);
         var m = codeToMode(cur.weather_code);
         /* trust measured precipitation over the coded summary — models lag on scattered showers */
         if ((cur.snowfall || 0) > 0) m = 'snow';
@@ -201,7 +326,7 @@
         }
         setupWeather(m, innerWidth, innerHeight);
       })
-      .catch(function () { /* no weather — keep the floating icons */ });
+      .catch(function () { /* no weather — keep the floating stickers */ });
   }
 
   /* preview override for testing: ?weather=sunny|cloudy|overcast|fog|rain|thunder|snow */
@@ -233,7 +358,7 @@
 
     getLocation(0)
       .then(function (loc) { return fetchWeatherFor(loc.lat, loc.lon); })
-      .catch(function () { /* no weather — keep the floating icons */ });
+      .catch(function () { /* no weather — keep the floating stickers */ });
   }
 
   /* ----- canvas ----- */
@@ -244,91 +369,162 @@
   var ctx = canvas.getContext('2d');
   var w = 0, h = 0;
 
+  var stars = [];
+  function makeStars() {
+    stars.length = 0;
+    var n = Math.min(140, Math.round(w / 9));
+    for (var i = 0; i < n; i++) {
+      stars.push({
+        x: Math.random() * w, y: Math.random() * h * 0.85,
+        r: 0.4 + Math.random() * 1.3,
+        p: Math.random() * Math.PI * 2,
+        tw: 0.008 + Math.random() * 0.02
+      });
+    }
+  }
+
   function resize() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth; h = window.innerHeight;
     canvas.width = w * dpr; canvas.height = h * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    makeStars();
+    makeCreatures();
   }
   resize();
   window.addEventListener('resize', resize);
 
-  /* pre-render each app icon with rounded corners */
-  var sprites = [];
-  ['/assets/img/pettibox-icon.webp', '/assets/img/directserve-icon.webp', '/assets/img/speakalert-icon.webp']
-    .forEach(function (src, i) {
-      var img = new Image();
-      img.onload = function () {
-        var s = 96, r = 24;
-        var off = document.createElement('canvas');
-        off.width = s; off.height = s;
-        var o = off.getContext('2d');
-        o.beginPath();
-        o.moveTo(r, 0); o.arcTo(s, 0, s, s, r); o.arcTo(s, s, 0, s, r);
-        o.arcTo(0, s, 0, 0, r); o.arcTo(0, 0, s, 0, r); o.closePath();
-        o.clip();
-        o.drawImage(img, 0, 0, s, s);
-        sprites[i] = off;
-      };
-      img.src = src;
-    });
-
-  var count = Math.max(8, Math.round((window.innerWidth * window.innerHeight) / 110000));
-  if (count > 15) count = 15;
-  var things = [];
-  for (var i = 0; i < count; i++) {
-    things.push({
-      x: Math.random() * Math.max(w, 800),
-      y: Math.random() * Math.max(h, 400),
-      size: 30 + Math.random() * 26,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      rot: (Math.random() - 0.5) * 0.6,
-      vr: (Math.random() - 0.5) * 0.004,
-      idx: i % 3,
-      wob: Math.random() * Math.PI * 2
-    });
+  /* little residents for each time of day: butterflies at noon, bats at dusk,
+     fireflies after dark — plus the morning birds below */
+  var fireflies, bats, butterflies;
+  function makeCreatures() {
+    /* assign fresh arrays — resize() calls this before the var initializers up here run */
+    fireflies = [];
+    var nf = Math.min(16, Math.round(w / 90));
+    for (var i = 0; i < nf; i++) {
+      fireflies.push({
+        x: Math.random() * w,
+        y: h * (0.45 + Math.random() * 0.5),
+        ph: Math.random() * Math.PI * 2,
+        blink: 0.015 + Math.random() * 0.02,
+        wob: Math.random() * Math.PI * 2
+      });
+    }
+    bats = [];
+    for (i = 0; i < 4; i++) {
+      bats.push({
+        x: Math.random() * w,
+        y: h * (0.08 + Math.random() * 0.3),
+        vx: (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random()),
+        ph: Math.random() * Math.PI * 2,
+        s: 5 + Math.random() * 2.5
+      });
+    }
+    butterflies = [];
+    var cols = ['rgba(180, 83, 9, 0.6)', 'rgba(109, 40, 217, 0.5)', 'rgba(14, 116, 144, 0.55)'];
+    for (i = 0; i < 3; i++) {
+      butterflies.push({
+        x: Math.random() * w,
+        y: h * (0.35 + Math.random() * 0.5),
+        t: Math.random() * 100,
+        s: 4.5 + Math.random() * 2,
+        col: cols[i % 3]
+      });
+    }
   }
 
-  var mx = -9999, my = -9999;
-  window.addEventListener('pointermove', function (e) { mx = e.clientX; my = e.clientY; });
-  document.documentElement.addEventListener('mouseleave', function () { mx = -9999; my = -9999; });
-
-  function drawIcons(alpha) {
-    for (var i = 0; i < things.length; i++) {
-      var t = things[i];
-      var dx = t.x - mx, dy = t.y - my, d2 = dx * dx + dy * dy;
-      if (d2 < 25600) {
-        var d = Math.sqrt(d2) || 1;
-        t.vx += (dx / d) * 0.2;
-        t.vy += (dy / d) * 0.2;
-        t.vr += (Math.random() - 0.5) * 0.01;
+  function drawFireflies(dark) {
+    for (var i = 0; i < fireflies.length; i++) {
+      var f = fireflies[i];
+      f.ph += f.blink;
+      f.wob += 0.006;
+      f.x += Math.cos(f.wob * 1.7) * 0.5;
+      f.y += Math.sin(f.wob * 2.3) * 0.35;
+      if (f.x < -10) f.x = w + 10; if (f.x > w + 10) f.x = -10;
+      if (f.y < h * 0.3) f.y = h * 0.3; if (f.y > h + 10) f.y = h * 0.6;
+      var a = Math.pow(Math.max(0, Math.sin(f.ph)), 3);
+      /* the tiny body is always there; the glow comes and goes */
+      ctx.fillStyle = dark
+        ? 'rgba(222, 255, 130, ' + (0.35 + 0.6 * a) + ')'
+        : 'rgba(70, 60, 30, 0.55)';
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, 1.2, 0, 6.2832);
+      ctx.fill();
+      if (a < 0.03) continue;
+      var g = ctx.createRadialGradient(f.x, f.y, 0.5, f.x, f.y, 8);
+      if (dark) {
+        g.addColorStop(0, 'rgba(222, 255, 130, ' + (0.85 * a) + ')');
+        g.addColorStop(1, 'rgba(222, 255, 130, 0)');
+      } else {
+        g.addColorStop(0, 'rgba(186, 144, 16, ' + (0.5 * a) + ')');
+        g.addColorStop(1, 'rgba(186, 144, 16, 0)');
       }
-      t.wob += 0.008;
-      t.vx = (t.vx + Math.cos(t.wob) * 0.005) * 0.985;
-      t.vy = (t.vy + Math.sin(t.wob * 1.3) * 0.005) * 0.985;
-      t.vr *= 0.99;
-      t.x += t.vx; t.y += t.vy; t.rot += t.vr;
-      if (t.x < -60) t.x = w + 60; if (t.x > w + 60) t.x = -60;
-      if (t.y < -60) t.y = h + 60; if (t.y > h + 60) t.y = -60;
-      var sp = sprites[t.idx];
-      if (!sp) continue;
-      ctx.save();
-      ctx.translate(t.x, t.y);
-      ctx.rotate(t.rot);
-      ctx.globalAlpha = alpha;
-      ctx.drawImage(sp, -t.size / 2, -t.size / 2, t.size, t.size);
-      ctx.restore();
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, 8, 0, 6.2832);
+      ctx.fill();
+    }
+  }
+
+  function drawBats() {
+    ctx.strokeStyle = 'rgba(44, 38, 54, 0.6)';
+    ctx.lineWidth = 1.7;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (var i = 0; i < bats.length; i++) {
+      var b = bats[i];
+      b.ph += 0.32;
+      b.x += b.vx + Math.sin(b.ph * 0.5) * 0.8;
+      b.y += Math.cos(b.ph * 0.31) * 1.1;
+      if (b.x < -30) b.x = w + 30; if (b.x > w + 30) b.x = -30;
+      if (b.y < 20) b.y = 20; if (b.y > h * 0.5) b.y = h * 0.5;
+      /* scalloped bat wings: tips up, membrane sagging toward the body, a little head bump */
+      var flap = (0.3 + 0.7 * Math.abs(Math.sin(b.ph))) * b.s * 0.9;
+      ctx.moveTo(b.x - b.s, b.y - flap);
+      ctx.quadraticCurveTo(b.x - b.s * 0.55, b.y + flap * 0.3, b.x - b.s * 0.18, b.y - b.s * 0.12);
+      ctx.quadraticCurveTo(b.x, b.y - b.s * 0.45, b.x + b.s * 0.18, b.y - b.s * 0.12);
+      ctx.quadraticCurveTo(b.x + b.s * 0.55, b.y + flap * 0.3, b.x + b.s, b.y - flap);
+    }
+    ctx.stroke();
+  }
+
+  function drawButterflies() {
+    for (var i = 0; i < butterflies.length; i++) {
+      var bf = butterflies[i];
+      bf.t += 0.02;
+      bf.x += Math.sin(bf.t * 1.3) * 1.1 + Math.cos(bf.t * 0.4) * 0.6;
+      bf.y += Math.cos(bf.t * 1.7) * 0.8;
+      if (bf.x < -20) bf.x = w + 20; if (bf.x > w + 20) bf.x = -20;
+      if (bf.y < h * 0.15) bf.y = h * 0.15; if (bf.y > h - 20) bf.y = h - 20;
+      var flap = 0.25 + 0.75 * Math.abs(Math.sin(bf.t * 6));
+      ctx.fillStyle = bf.col;
+      ctx.beginPath();
+      ctx.ellipse(bf.x - bf.s * 0.7 * flap, bf.y, bf.s * flap, bf.s * 0.62, -0.35, 0, 6.2832);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(bf.x + bf.s * 0.7 * flap, bf.y, bf.s * flap, bf.s * 0.62, 0.35, 0, 6.2832);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(40, 34, 28, 0.55)';
+      ctx.beginPath();
+      ctx.ellipse(bf.x, bf.y, 1, bf.s * 0.5, 0, 0, 6.2832);
+      ctx.fill();
     }
   }
 
   function drawSun() {
-    sunAngle += 0.0025;
+    /* the sun tracks the visitor's day: low and golden in the morning,
+       high at midday, low and amber in the evening */
+    var period = skyNow();
     var sx = w - 120, sy = 125, r = 46;
+    var ray = 'rgba(238, 166, 40, 0.75)', core = '246, 186, 55';
+    if (period === 'morning') { sx = 130; sy = 165; ray = 'rgba(244, 196, 48, 0.8)'; core = '250, 210, 90'; }
+    else if (period === 'evening') { sx = w - 120; sy = 185; ray = 'rgba(230, 126, 52, 0.75)'; core = '240, 148, 70'; }
+    sunAngle += 0.0025;
     ctx.save();
     ctx.translate(sx, sy);
     ctx.rotate(sunAngle);
-    ctx.strokeStyle = 'rgba(238, 166, 40, 0.75)';
+    ctx.strokeStyle = ray;
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -340,29 +536,196 @@
     ctx.stroke();
     ctx.restore();
     var g = ctx.createRadialGradient(sx, sy, 4, sx, sy, r + 6);
-    g.addColorStop(0, 'rgba(246, 186, 55, 0.95)');
-    g.addColorStop(1, 'rgba(246, 186, 55, 0.22)');
+    g.addColorStop(0, 'rgba(' + core + ', 0.95)');
+    g.addColorStop(1, 'rgba(' + core + ', 0.22)');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(sx, sy, r, 0, 6.2832);
     ctx.fill();
   }
 
-  function drawClouds() {
-    /* a wash over the sky so grey days actually read as grey */
-    if (mode === 'thunder') {
-      ctx.fillStyle = 'rgba(76, 84, 104, 0.27)';
-      ctx.fillRect(0, 0, w, h);
-    } else if (mode === 'overcast') {
-      ctx.fillStyle = 'rgba(130, 138, 154, 0.18)';
-      ctx.fillRect(0, 0, w, h);
-    } else if (mode === 'rain') {
-      ctx.fillStyle = 'rgba(120, 132, 150, 0.13)';
-      ctx.fillRect(0, 0, w, h);
+  /* the real moon: phase computed from the date, so the site's moon matches the sky's.
+     Testing override: ?moon=0..1 (0 = new, 0.25 = first quarter, 0.5 = full, 0.75 = last quarter) */
+  function moonPhase() {
+    var forcedMoon = /[?&]moon=(0?\.\d+|[01])/.exec(location.search);
+    if (forcedMoon) return parseFloat(forcedMoon[1]);
+    var SYNODIC = 29.530588853;
+    var days = (Date.now() - 947182440000) / 86400000; /* since the new moon of 2000-01-06 18:14 UTC */
+    var p = (days % SYNODIC) / SYNODIC;
+    return p < 0 ? p + 1 : p;
+  }
+
+  function drawMoon() {
+    var mx0 = w - 130, my0 = 125, r = 38;
+    var p = moonPhase();
+    var f = (1 - Math.cos(p * 2 * Math.PI)) / 2; /* illuminated fraction */
+    /* around the new moon, keep a slim artistic sliver so there's always a moon to find */
+    if (f < 0.06) { p = p < 0.5 ? 0.08 : 0.92; f = 0.06; }
+    var waxing = p <= 0.5;
+    var c = Math.cos(p * 2 * Math.PI);
+    var rx = Math.max(0.5, r * Math.abs(c));
+
+    var g = ctx.createRadialGradient(mx0, my0, r * 0.5, mx0, my0, r * 2.4);
+    g.addColorStop(0, 'rgba(214, 222, 247, ' + (0.1 + 0.18 * f) + ')');
+    g.addColorStop(1, 'rgba(214, 222, 247, 0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(mx0, my0, r * 2.4, 0, 6.2832);
+    ctx.fill();
+
+    /* the dark side, faintly there (earthshine) */
+    ctx.fillStyle = 'rgba(214, 222, 247, 0.13)';
+    ctx.beginPath();
+    ctx.arc(mx0, my0, r, 0, 6.2832);
+    ctx.fill();
+
+    /* the lit side: limb arc + elliptical terminator */
+    ctx.fillStyle = 'rgba(233, 238, 252, 0.95)';
+    ctx.beginPath();
+    if (waxing) {
+      ctx.arc(mx0, my0, r, -Math.PI / 2, Math.PI / 2, false);
+      ctx.ellipse(mx0, my0, rx, r, 0, Math.PI / 2, -Math.PI / 2, c > 0);
+    } else {
+      ctx.arc(mx0, my0, r, Math.PI / 2, -Math.PI / 2, false);
+      ctx.ellipse(mx0, my0, rx, r, 0, -Math.PI / 2, Math.PI / 2, c > 0);
     }
-    var col = mode === 'thunder' ? 'rgba(56, 64, 86, 0.6)'
-      : mode === 'overcast' ? 'rgba(96, 106, 128, 0.52)'
-      : 'rgba(128, 140, 162, 0.42)';
+    ctx.closePath();
+    ctx.fill();
+
+    /* a few craters so it reads as a moon, not a spotlight — they fade with the light */
+    ctx.fillStyle = 'rgba(178, 188, 220, ' + (0.55 * Math.max(0.25, f)) + ')';
+    ctx.beginPath(); ctx.arc(mx0 - r * 0.3, my0 - r * 0.25, r * 0.16, 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(mx0 + r * 0.28, my0 + 3, r * 0.22, 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(mx0 - r * 0.12, my0 + r * 0.42, r * 0.12, 0, 6.2832); ctx.fill();
+  }
+
+  /* morning birds: every so often a little flock glides across the sunrise.
+     Testing override: ?birds=1 sends the first flock out immediately */
+  var flock = null, nextFlock = 0;
+  var forcedBirds = /[?&]birds=1/.test(location.search);
+  function drawBirds() {
+    var now = performance.now();
+    /* the first flock shows up quickly so morning visitors actually meet it */
+    if (!nextFlock) nextFlock = forcedBirds ? now : now + 2000 + Math.random() * 3000;
+    if (!flock && now > nextFlock) {
+      var dir = Math.random() < 0.5 ? 1 : -1;
+      var n = 3 + Math.floor(Math.random() * 3);
+      flock = { dir: dir, birds: [] };
+      for (var i = 0; i < n; i++) {
+        flock.birds.push({
+          /* forced (test/demo) flocks start on screen; natural ones fly in from the edge */
+          x: forcedBirds
+            ? w * 0.3 + i * 44
+            : (dir > 0 ? -60 : w + 60) - dir * i * (26 + Math.random() * 18),
+          y: h * (0.07 + Math.random() * 0.2) + i * 7,
+          v: 1.5 + Math.random() * 0.7,
+          s: 4.5 + Math.random() * 2.5,
+          ph: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    if (!flock) return;
+    ctx.strokeStyle = 'rgba(28, 26, 23, 0.5)';
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    var alive = false;
+    for (var j = 0; j < flock.birds.length; j++) {
+      var b = flock.birds[j];
+      b.x += flock.dir * b.v;
+      b.ph += 0.16;
+      b.y += Math.sin(b.ph * 0.35) * 0.15;
+      if (b.x > -80 && b.x < w + 80) alive = true;
+      /* two arched wings, like a distant gull — humps up, tips a touch lower */
+      var flap = (0.35 + 0.65 * Math.abs(Math.sin(b.ph))) * b.s * 0.9;
+      ctx.moveTo(b.x, b.y);
+      ctx.quadraticCurveTo(b.x - b.s * 0.5, b.y - flap * 1.4, b.x - b.s, b.y - flap * 0.55);
+      ctx.moveTo(b.x, b.y);
+      ctx.quadraticCurveTo(b.x + b.s * 0.5, b.y - flap * 1.4, b.x + b.s, b.y - flap * 0.55);
+    }
+    ctx.stroke();
+    if (!alive) {
+      flock = null;
+      nextFlock = performance.now() + 9000 + Math.random() * 16000;
+    }
+  }
+
+  /* shooting stars: a brief streak across a clear night, then a long quiet wait */
+  var meteor = null, nextMeteor = 0;
+  function drawMeteor() {
+    var now = performance.now();
+    if (!nextMeteor) nextMeteor = now + 6000 + Math.random() * 14000;
+    if (!meteor && now > nextMeteor) {
+      var dir = Math.random() < 0.5 ? 1 : -1;
+      meteor = {
+        x: w * (0.15 + Math.random() * 0.7),
+        y: h * (0.05 + Math.random() * 0.25),
+        vx: dir * (7 + Math.random() * 4),
+        vy: 3 + Math.random() * 2,
+        life: 1
+      };
+    }
+    if (!meteor) return;
+    meteor.x += meteor.vx;
+    meteor.y += meteor.vy;
+    meteor.life -= 0.022;
+    if (meteor.life <= 0 || meteor.x < -80 || meteor.x > w + 80 || meteor.y > h + 40) {
+      meteor = null;
+      nextMeteor = performance.now() + 14000 + Math.random() * 26000;
+      return;
+    }
+    var tx = meteor.x - meteor.vx * 9 * meteor.life;
+    var ty = meteor.y - meteor.vy * 9 * meteor.life;
+    var grad = ctx.createLinearGradient(meteor.x, meteor.y, tx, ty);
+    grad.addColorStop(0, 'rgba(240, 244, 255, ' + (0.9 * meteor.life) + ')');
+    grad.addColorStop(1, 'rgba(240, 244, 255, 0)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(meteor.x, meteor.y);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+  }
+
+  function drawStars() {
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      s.p += s.tw;
+      var a = 0.25 + 0.6 * Math.abs(Math.sin(s.p));
+      ctx.fillStyle = 'rgba(226, 232, 250, ' + a.toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+      ctx.fill();
+    }
+  }
+
+  function drawClouds(night) {
+    /* a wash over the sky so grey days actually read as grey;
+       at night the page is already dark, so the clouds go moonlit-silver instead */
+    if (!night) {
+      if (mode === 'thunder') {
+        ctx.fillStyle = 'rgba(76, 84, 104, 0.27)';
+        ctx.fillRect(0, 0, w, h);
+      } else if (mode === 'overcast') {
+        ctx.fillStyle = 'rgba(130, 138, 154, 0.18)';
+        ctx.fillRect(0, 0, w, h);
+      } else if (mode === 'rain') {
+        ctx.fillStyle = 'rgba(120, 132, 150, 0.13)';
+        ctx.fillRect(0, 0, w, h);
+      }
+    }
+    var col;
+    if (night) {
+      col = mode === 'thunder' ? 'rgba(126, 134, 164, 0.42)'
+        : mode === 'overcast' ? 'rgba(150, 158, 182, 0.36)'
+        : 'rgba(168, 176, 200, 0.3)';
+    } else {
+      col = mode === 'thunder' ? 'rgba(56, 64, 86, 0.6)'
+        : mode === 'overcast' ? 'rgba(96, 106, 128, 0.52)'
+        : 'rgba(128, 140, 162, 0.42)';
+    }
     ctx.fillStyle = col;
     for (var i = 0; i < clouds.length; i++) {
       var c = clouds[i];
@@ -376,10 +739,10 @@
     }
   }
 
-  function drawFog() {
-    ctx.fillStyle = 'rgba(148, 156, 172, 0.2)';
+  function drawFog(night) {
+    ctx.fillStyle = night ? 'rgba(120, 128, 148, 0.14)' : 'rgba(148, 156, 172, 0.2)';
     ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(158, 166, 184, 0.45)';
+    ctx.fillStyle = night ? 'rgba(152, 160, 180, 0.3)' : 'rgba(158, 166, 184, 0.45)';
     for (var i = 0; i < fogBands.length; i++) {
       var f = fogBands[i];
       f.x += f.v;
@@ -390,8 +753,8 @@
     }
   }
 
-  function drawRain() {
-    ctx.strokeStyle = 'rgba(86, 116, 152, 0.58)';
+  function drawRain(night) {
+    ctx.strokeStyle = night ? 'rgba(150, 178, 220, 0.5)' : 'rgba(86, 116, 152, 0.58)';
     ctx.lineWidth = 1.4;
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -406,8 +769,8 @@
     ctx.stroke();
   }
 
-  function drawSnow() {
-    ctx.fillStyle = 'rgba(120, 140, 170, 0.72)';
+  function drawSnow(night) {
+    ctx.fillStyle = night ? 'rgba(228, 236, 250, 0.82)' : 'rgba(120, 140, 170, 0.72)';
     for (var i = 0; i < snowFlakes.length; i++) {
       var f = snowFlakes[i];
       f.phase += f.spin;
@@ -422,7 +785,7 @@
   }
 
   var bolt = null;
-  function drawFlash() {
+  function drawFlash(night) {
     var now = performance.now();
     if (now > nextFlash) {
       flashA = 1;
@@ -438,8 +801,10 @@
       }
     }
     if (flashA > 0.03) {
-      /* on a light page a storm flash reads as a dark pulse, not a white one */
-      ctx.fillStyle = 'rgba(40, 46, 66, ' + (0.3 * flashA) + ')';
+      /* on a light page a storm flash reads as a dark pulse; on the night page it's a real flash */
+      ctx.fillStyle = night
+        ? 'rgba(200, 212, 255, ' + (0.16 * flashA) + ')'
+        : 'rgba(40, 46, 66, ' + (0.3 * flashA) + ')';
       ctx.fillRect(0, 0, w, h);
       if (bolt) {
         ctx.lineCap = 'round';
@@ -462,15 +827,26 @@
 
   function tick() {
     ctx.clearRect(0, 0, w, h);
-    /* the app icons float in every kind of weather — the weather draws over them */
-    if (mode === 'sunny') { drawSun(); drawIcons(0.3); }
-    else if (mode === 'cloudy') { drawSun(); drawIcons(0.28); drawClouds(); }
-    else if (mode === 'overcast') { drawIcons(0.26); drawClouds(); }
-    else if (mode === 'fog') { drawIcons(0.24); drawFog(); }
-    else if (mode === 'rain') { drawIcons(0.22); drawClouds(); drawRain(); }
-    else if (mode === 'thunder') { drawIcons(0.22); drawClouds(); drawRain(); drawFlash(); }
-    else if (mode === 'snow') { drawIcons(0.24); drawSnow(); }
-    else { drawIcons(0.3); }
+    /* the sky first; at night a clear sky gets the moon and stars instead of the sun */
+    var sky = skyNow();
+    var night = sky === 'night';
+    if (mode === 'sunny' || mode === 'cloudy' || mode === 'icons') {
+      if (night) { drawStars(); drawMeteor(); drawMoon(); } else { drawSun(); }
+      if (mode === 'cloudy') drawClouds(night);
+    }
+    else if (mode === 'overcast') { drawClouds(night); }
+    else if (mode === 'fog') { drawFog(night); }
+    else if (mode === 'rain') { drawClouds(night); drawRain(night); }
+    else if (mode === 'thunder') { drawClouds(night); drawRain(night); drawFlash(night); }
+    else if (mode === 'snow') { if (night) drawStars(); drawSnow(night); }
+    /* then the residents, when the weather is calm enough to be out:
+       birds at sunrise, butterflies at noon, bats at dusk, fireflies after dark */
+    if (mode === 'sunny' || mode === 'cloudy' || mode === 'overcast' || mode === 'icons') {
+      if (sky === 'morning') drawBirds();
+      else if (sky === 'day') drawButterflies();
+      else if (sky === 'evening') { drawBats(); drawFireflies(false); }
+      else { drawFireflies(true); }
+    }
     requestAnimationFrame(tick);
   }
   tick();
@@ -496,6 +872,10 @@
     '<g class="umbrella"><line x1="16" y1="16" x2="16" y2="1.5"/>' +
     '<path class="canopy" d="M6 3.5 Q16 -6 26 3.5 Q22.7 1.4 19.3 3.5 Q16 1.4 12.7 3.5 Q9.3 1.4 6 3.5 Z"/></g>' +
     '<g class="beanie"><path d="M8.4 4.4 A3.6 3.6 0 0 1 15.6 4.4 Z"/><circle cx="12" cy="0.7" r="1.3"/></g>' +
+    '<g class="lantern"><ellipse class="lglow" cx="7" cy="21" rx="7" ry="5"/>' +
+    '<line x1="7" y1="16" x2="7" y2="17.6"/>' +
+    '<rect x="5.4" y="17.6" width="3.2" height="4.6" rx="1.1"/>' +
+    '<circle class="flame" cx="7" cy="19.9" r="1.05"/></g>' +
     '<g class="shades"><line x1="7.4" y1="4.4" x2="16.6" y2="4.4"/><circle cx="10.2" cy="4.8" r="1.5"/><circle cx="13.8" cy="4.8" r="1.5"/></g>' +
     '</svg>';
   document.body.appendChild(man);
@@ -507,6 +887,10 @@
 
   function isSunny() {
     return document.body.classList.contains('weather-sunny');
+  }
+
+  function isMorning() {
+    return document.body.classList.contains('sky-morning');
   }
 
   function findShelter(px, py) {
@@ -524,24 +908,71 @@
     return best;
   }
 
+  /* he says hello once per visit, and goodbye when the mouse heads for the exit.
+     Testing override: ?hi=1 makes him greet again even if he already has */
+  var forcedHi = /[?&]hi=1/.test(location.search);
+  var hiDone = false, byeDone = false;
+  try {
+    hiDone = !forcedHi && !!sessionStorage.getItem('gg-hi');
+    byeDone = !forcedHi && !!sessionStorage.getItem('gg-bye');
+  } catch (e) {}
+
+  function waveHi(delay) {
+    if (hiDone) return;
+    setTimeout(function () { man.classList.add('wave-hi'); }, delay);
+    setTimeout(function () {
+      man.classList.remove('wave-hi');
+      try { sessionStorage.setItem('gg-hi', '1'); } catch (e) {}
+    }, delay + 2700);
+  }
+
   if (window.matchMedia('(pointer: fine)').matches) {
     /* desktop: he chases the mouse pointer */
     var x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, dir = 1;
     var lastPointer = 0, shelter = null, lastShelterCalc = 0;
     var wander = null, nextWander = 0;
 
+    /* first arrival: he strolls in from the left and waves before settling down */
+    var entryUntil = 0;
+    var ex = Math.min(150, innerWidth * 0.14), ey = Math.max(170, innerHeight * 0.45);
+    if (!hiDone) {
+      x = -40; y = ey; tx = x; ty = y;
+      man.style.opacity = '1';
+      entryUntil = Date.now() + 4600;
+      waveHi(1400);
+    }
+
     window.addEventListener('pointermove', function (e) {
       tx = e.clientX; ty = e.clientY;
       lastPointer = Date.now();
       man.style.opacity = '1';
     });
-    document.documentElement.addEventListener('mouseleave', function () { man.style.opacity = '0'; });
+    document.documentElement.addEventListener('mouseleave', function (e) {
+      if (!byeDone && e.clientY <= 60) {
+        byeDone = true;
+        try { sessionStorage.setItem('gg-bye', '1'); } catch (err) {}
+        man.style.opacity = '1';
+        dir = 1; /* face forward so the bubble reads left-to-right */
+        man.classList.add('wave-bye');
+        setTimeout(function () {
+          man.classList.remove('wave-bye');
+          man.style.opacity = '0';
+        }, 2200);
+        return;
+      }
+      man.style.opacity = '0';
+    });
 
     (function chase() {
       var now = Date.now();
       var gx = tx, gy = ty;
-      var sunbathing = false;
-      if (badWeather() && now - lastPointer > 1400) {
+      var sunbathing = false, stretching = false;
+      if (now < entryUntil) {
+        /* walking in to say hello — nothing interrupts a greeting */
+        gx = ex; gy = ey;
+        dir = 1;
+      }
+      else if (badWeather() && now - lastPointer > 1400) {
         if (!shelter || now - lastShelterCalc > 450) {
           shelter = findShelter(x, y) || shelter;
           lastShelterCalc = now;
@@ -549,7 +980,11 @@
         if (shelter) { gx = shelter.x; gy = shelter.y; }
       } else {
         shelter = null;
-        if (isSunny() && now - lastPointer > 2500) {
+        if (isMorning() && now - lastPointer > 2500) {
+          /* early hours, nothing to chase — a good long morning stretch */
+          gx = x; gy = y;
+          stretching = true;
+        } else if (isSunny() && now - lastPointer > 2500) {
           /* nice weather, nothing to chase — time for a sunbath */
           gx = x; gy = y;
           sunbathing = true;
@@ -574,6 +1009,7 @@
       if (Math.abs(dx) > 1) dir = dx > 0 ? 1 : -1;
       man.classList.toggle('moving', speed > 8);
       man.classList.toggle('sunbathe', sunbathing && speed < 2);
+      man.classList.toggle('stretch', stretching && speed < 2);
       man.style.transform = 'translate(' + x + 'px,' + y + 'px) translate(-50%,-110%) scaleX(' + dir + ')';
       requestAnimationFrame(chase);
     })();
@@ -586,6 +1022,7 @@
     var mShelter = null, mShelterCalc = 0;
     var mWander = null, mNextWander = 0;
     man.style.opacity = '1';
+    waveHi(1200);
 
     function walkTarget() {
       var max = document.documentElement.scrollHeight - window.innerHeight;
@@ -615,7 +1052,7 @@
         mShelter = null;
       }
       if (mShelter) { gx = mShelter.x; gy = mShelter.y; }
-      else if (idleFor > 3000 && !isSunny()) {
+      else if (idleFor > 3000 && !isSunny() && !isMorning()) {
         /* nothing happening — he paces along the bottom edge */
         if (now > mNextWander) {
           mNextWander = now + 2600 + Math.random() * 2800;
@@ -632,8 +1069,10 @@
       if (Math.abs(dx) > 1) wdir = dx > 0 ? 1 : -1;
       var moving = Math.abs(dx) + Math.abs(dy) > 1.6 || idleFor < 140;
       man.classList.toggle('moving', moving);
-      /* on a lazy sunny day with no scrolling, he lies down for a sunbath */
-      man.classList.toggle('sunbathe', !moving && idleFor > 3000 && isSunny());
+      /* on a lazy sunny day with no scrolling, he lies down for a sunbath;
+         in the morning he stays put and stretches instead */
+      man.classList.toggle('sunbathe', !moving && idleFor > 3000 && isSunny() && !isMorning());
+      man.classList.toggle('stretch', !moving && idleFor > 3000 && isMorning() && !badWeather());
       man.style.transform = 'translate(' + wx + 'px,' + wy + 'px) translate(-50%,-100%) scaleX(' + wdir + ')';
       requestAnimationFrame(walk);
     })();
