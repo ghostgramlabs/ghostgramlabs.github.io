@@ -164,8 +164,21 @@
     cloudy: "<strong>Cloudy night</strong> over your town — same moody sky in here."
   };
 
+  /* little line icons for the weather buttons in the note (sunny reuses the sky's sun) */
+  var WX_SVG_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var WX_CLOUD_UP = '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a4 4 0 0 0 0-8z" transform="translate(0,-3.5)"/>';
+  var WX_ICONS = {
+    cloudy: WX_SVG_OPEN + '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a4 4 0 0 0 0-8z"/></svg>',
+    overcast: WX_SVG_OPEN + '<path d="M15.8 4.9a4.3 4.3 0 0 0-7.4.9"/><path d="M18 13h-1.26A8 8 0 1 0 9 23h9a4 4 0 0 0 0-8z" transform="translate(0,-2.5)"/></svg>',
+    fog: WX_SVG_OPEN + WX_CLOUD_UP + '<line x1="6" y1="19.5" x2="17" y2="19.5"/><line x1="8" y1="22.5" x2="19" y2="22.5"/></svg>',
+    rain: WX_SVG_OPEN + WX_CLOUD_UP + '<line x1="8" y1="19" x2="8" y2="21.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="16" y1="19" x2="16" y2="21.5"/></svg>',
+    thunder: WX_SVG_OPEN + WX_CLOUD_UP + '<polyline points="12.5 17.5 10.5 20.5 13.5 20.5 11.5 23.5"/></svg>',
+    snow: WX_SVG_OPEN + WX_CLOUD_UP + '<circle cx="8" cy="20.5" r="0.8" fill="currentColor" stroke="none"/><circle cx="12" cy="21.5" r="0.8" fill="currentColor" stroke="none"/><circle cx="16" cy="20.5" r="0.8" fill="currentColor" stroke="none"/></svg>'
+  };
+
   var usedPrecise = false;
   var manualPick = false;
+  var noteBuilt = false; /* after the first appearance, rebuilds are instant */
   var noteTucked = /[?&]wxhide=1/.test(location.search); /* only × and the tab ever change this */
 
   function skyNow() {
@@ -188,14 +201,13 @@
       var noteText = (night && wxNightNotes[m]) ? wxNightNotes[m] : wxNotes[m];
       var fixLink = (navigator.geolocation && !usedPrecise && !manualPick)
         ? ' <a href="#" class="wx-fix">Wrong? Use my exact spot</a>' : '';
-      var pickLink = ' <a href="#" class="wx-pick">Or pick the weather yourself.</a>';
       /* time-of-day buttons: morning / day / evening / night, plus "live" to follow the real sun */
       var skyRow = '';
       if (window.ggSky) {
         var skies = ['morning', 'day', 'evening', 'night'];
         var cur = skyNow();
         var pinned = window.ggSky.pinned();
-        skyRow = '<span class="wx-skyrow" role="group" aria-label="Change the time of day">';
+        skyRow = '<span class="wx-skyrow" role="group" aria-label="Change the time of day"><i class="wx-rowlab">sky</i>';
         for (var si = 0; si < skies.length; si++) {
           skyRow += '<button type="button" class="wx-skybtn' + (pinned === skies[si] ? ' on' : '') +
             '" data-sky="' + skies[si] + '" title="' + skies[si] + '" aria-label="Switch to ' + skies[si] + '">' +
@@ -204,8 +216,19 @@
         skyRow += '<button type="button" class="wx-skybtn wx-skylive' + (!pinned ? ' on' : '') +
           '" data-sky="" title="follow your real sky (' + cur + ' now)" aria-label="Follow your real sky">live</button></span>';
       }
+      /* weather buttons: pick any sky-mood, or go back to the real thing */
+      var wxOrder = ['sunny', 'cloudy', 'overcast', 'fog', 'rain', 'thunder', 'snow'];
+      var wxRow = '<span class="wx-skyrow" role="group" aria-label="Pick the weather"><i class="wx-rowlab">weather</i>';
+      for (var wi = 0; wi < wxOrder.length; wi++) {
+        var wxIcon = WX_ICONS[wxOrder[wi]] || (window.ggSky && window.ggSky.icons.day) || '';
+        wxRow += '<button type="button" class="wx-skybtn' + (manualPick && mode === wxOrder[wi] ? ' on' : '') +
+          '" data-wx="' + wxOrder[wi] + '" title="' + wxOrder[wi] + '" aria-label="Switch weather to ' + wxOrder[wi] + '">' +
+          wxIcon + '</button>';
+      }
+      wxRow += '<button type="button" class="wx-skybtn wx-skylive' + (!manualPick ? ' on' : '') +
+        '" data-wx="" title="back to your real weather" aria-label="Back to your real weather">live</button></span>';
       var tabIcon = (window.ggSky && window.ggSky.icons[skyNow()]) || '&#9728;';
-      el.innerHTML = '<p>' + noteText + ' <span class="wx-sub">Live from your sky, just for fun.' + fixLink + pickLink + '</span>' + skyRow + '</p>' +
+      el.innerHTML = '<p>' + noteText + ' <span class="wx-sub">Live from your sky, just for fun.' + fixLink + '</span>' + wxRow + skyRow + '</p>' +
         '<button type="button" class="wx-close" aria-label="Tuck away">&times;</button>' +
         '<button type="button" class="wx-tab" aria-label="Weather &amp; sky options" title="Weather &amp; sky">' + tabIcon + '</button>';
       document.body.appendChild(el);
@@ -226,15 +249,7 @@
           fetchWeatherFor(pos.coords.latitude, pos.coords.longitude);
         }, function () {}, { timeout: 9000, maximumAge: 300000 });
       });
-      var pick = el.querySelector('.wx-pick');
-      if (pick) pick.addEventListener('click', function (ev) {
-        ev.preventDefault();
-        var order = ['sunny', 'cloudy', 'overcast', 'fog', 'rain', 'thunder', 'snow'];
-        var next = order[(order.indexOf(mode) + 1) % order.length];
-        manualPick = true;
-        setupWeather(next, innerWidth, innerHeight);
-      });
-      var sbs = el.querySelectorAll('.wx-skybtn');
+      var sbs = el.querySelectorAll('.wx-skybtn[data-sky]');
       for (var bi = 0; bi < sbs.length; bi++) {
         (function (btnEl) {
           btnEl.addEventListener('click', function () {
@@ -243,7 +258,24 @@
           });
         })(sbs[bi]);
       }
-    }, (fast || collapsed) ? 120 : 1500);
+      var wbs = el.querySelectorAll('.wx-skybtn[data-wx]');
+      for (var wj = 0; wj < wbs.length; wj++) {
+        (function (btnEl) {
+          btnEl.addEventListener('click', function () {
+            var v = btnEl.getAttribute('data-wx');
+            if (v) {
+              manualPick = true;
+              setupWeather(v, innerWidth, innerHeight);
+            } else {
+              /* back to the real thing — refetch and let the sky resync too */
+              manualPick = false;
+              loadRealWeather();
+            }
+          });
+        })(wbs[wj]);
+      }
+      noteBuilt = true;
+    }, (fast || collapsed || noteBuilt) ? 120 : 1500);
   }
 
   function clearWeather() {
@@ -329,36 +361,42 @@
       .catch(function () { /* no weather — keep the floating stickers */ });
   }
 
-  /* preview override for testing: ?weather=sunny|cloudy|overcast|fog|rain|thunder|snow */
-  var forced = /[?&]weather=(sunny|cloudy|overcast|fog|rain|thunder|snow)/.exec(location.search);
-  if (forced) {
-    setupWeather(forced[1], innerWidth, innerHeight);
-  } else if (window.fetch) {
-    /* three free keyless geo services, tried in order — if one is down the next answers */
-    var geoSources = [
-      { url: 'https://get.geojs.io/v1/ip/geo.json',
-        parse: function (j) { return { lat: parseFloat(j.latitude), lon: parseFloat(j.longitude) }; } },
-      { url: 'https://ipwho.is/?fields=success,latitude,longitude',
-        parse: function (j) { return j.success ? { lat: j.latitude, lon: j.longitude } : null; } },
-      { url: 'https://ipapi.co/json/',
-        parse: function (j) { return { lat: j.latitude, lon: j.longitude }; } }
-    ];
+  /* three free keyless geo services, tried in order — if one is down the next answers */
+  var geoSources = [
+    { url: 'https://get.geojs.io/v1/ip/geo.json',
+      parse: function (j) { return { lat: parseFloat(j.latitude), lon: parseFloat(j.longitude) }; } },
+    { url: 'https://ipwho.is/?fields=success,latitude,longitude',
+      parse: function (j) { return j.success ? { lat: j.latitude, lon: j.longitude } : null; } },
+    { url: 'https://ipapi.co/json/',
+      parse: function (j) { return { lat: j.latitude, lon: j.longitude }; } }
+  ];
 
-    function getLocation(i) {
-      if (i >= geoSources.length) return Promise.reject(new Error('no geo'));
-      return fetch(geoSources[i].url)
-        .then(function (r) { return r.json(); })
-        .then(function (j) {
-          var p = geoSources[i].parse(j);
-          if (p && isFinite(p.lat) && isFinite(p.lon)) return p;
-          throw new Error('bad geo');
-        })
-        .catch(function () { return getLocation(i + 1); });
-    }
+  function getLocation(i) {
+    if (i >= geoSources.length) return Promise.reject(new Error('no geo'));
+    return fetch(geoSources[i].url)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var p = geoSources[i].parse(j);
+        if (p && isFinite(p.lat) && isFinite(p.lon)) return p;
+        throw new Error('bad geo');
+      })
+      .catch(function () { return getLocation(i + 1); });
+  }
 
+  function loadRealWeather() {
+    if (!window.fetch) return;
     getLocation(0)
       .then(function (loc) { return fetchWeatherFor(loc.lat, loc.lon); })
       .catch(function () { /* no weather — keep the floating stickers */ });
+  }
+
+  /* preview override for testing: ?weather=sunny|cloudy|overcast|fog|rain|thunder|snow */
+  var forced = /[?&]weather=(sunny|cloudy|overcast|fog|rain|thunder|snow)/.exec(location.search);
+  if (forced) {
+    manualPick = true;
+    setupWeather(forced[1], innerWidth, innerHeight);
+  } else {
+    loadRealWeather();
   }
 
   /* ----- canvas ----- */
