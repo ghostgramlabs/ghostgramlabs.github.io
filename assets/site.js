@@ -58,6 +58,12 @@
   var THEME = { morning: '#fcf4dd', day: '#faf6ee', evening: '#f8ece3', night: '#15141d' };
   var manual = null;
   var daylight = null; /* from the weather API: 1 = sun is up, 0 = sun is down, null = not heard yet */
+  var daylightAt = 0; /* when the API last told us — old news shouldn't overrule the clock all night */
+  var DAYLIGHT_TTL = 45 * 60000;
+
+  function sunKnown() {
+    return daylight !== null && (Date.now() - daylightAt) < DAYLIGHT_TTL;
+  }
 
   function byClock() {
     var hr = new Date().getHours();
@@ -71,12 +77,15 @@
   function pick() {
     if (manual) return manual;
     var p = byClock();
-    if (daylight === 0) return 'night';
-    if (daylight === 1 && p === 'night') return 'evening';
+    if (sunKnown()) {
+      if (daylight === 0) return 'night';
+      if (p === 'night') return 'evening';
+    }
     return p;
   }
 
   function apply(p) {
+    if (document.body.classList.contains('sky-' + p)) return;
     SKIES.forEach(function (s) { document.body.classList.remove('sky-' + s); });
     document.body.classList.add('sky-' + p);
     var meta = document.querySelector('meta[name="theme-color"]');
@@ -106,6 +115,12 @@
     try { manual = sessionStorage.getItem('gg-sky') || null; } catch (e) {}
     if (SKIES.indexOf(manual) < 0) manual = null;
   }
+  /* the sun answer from the last page of this visit — without it every navigation
+     repaints from the clock alone, flashing night before the weather fetch corrects it */
+  try {
+    var savedSun = /^([01]):(\d+)$/.exec(sessionStorage.getItem('gg-daylight') || '');
+    if (savedSun) { daylight = +savedSun[1]; daylightAt = +savedSun[2]; }
+  } catch (e) {}
   apply(pick());
 
   /* keep up with the clock so the page dims as the visitor's evening arrives */
@@ -123,6 +138,11 @@
     set: function (p) { manual = p; remember(p); apply(pick()); },
     syncDaylight: function (d) {
       daylight = (d === 0 || d === 1) ? d : null;
+      daylightAt = Date.now();
+      try {
+        if (daylight === null) sessionStorage.removeItem('gg-daylight');
+        else sessionStorage.setItem('gg-daylight', daylight + ':' + daylightAt);
+      } catch (e) {}
       apply(pick());
     }
   };
@@ -973,7 +993,7 @@
     var wander = null, nextWander = 0;
 
     /* first arrival: he strolls in from the left and waves before settling down */
-    var entryUntil = 0;
+    var entryUntil = 0, byeUntil = 0;
     var ex = Math.min(150, innerWidth * 0.14), ey = Math.max(170, innerHeight * 0.45);
     if (!hiDone) {
       x = -40; y = ey; tx = x; ty = y;
@@ -992,7 +1012,7 @@
         byeDone = true;
         try { sessionStorage.setItem('gg-bye', '1'); } catch (err) {}
         man.style.opacity = '1';
-        dir = 1; /* face forward so the bubble reads left-to-right */
+        byeUntil = Date.now() + 2200;
         man.classList.add('wave-bye');
         setTimeout(function () {
           man.classList.remove('wave-bye');
@@ -1007,7 +1027,14 @@
       var now = Date.now();
       var gx = tx, gy = ty;
       var sunbathing = false, stretching = false;
-      if (now < entryUntil) {
+      if (now < byeUntil) {
+        /* saying goodbye: step back to where the bubble fits on screen —
+           it pops up and to the right of him, and he's usually at the very
+           top edge (that's what triggered the bye) */
+        gx = Math.max(24, Math.min(x, innerWidth - 210));
+        gy = Math.max(y, 104);
+      }
+      else if (now < entryUntil) {
         /* walking in to say hello — nothing interrupts a greeting */
         gx = ex; gy = ey;
         dir = 1;
@@ -1047,6 +1074,7 @@
       y += dy * 0.07;
       var speed = Math.abs(dx) + Math.abs(dy);
       if (Math.abs(dx) > 1) dir = dx > 0 ? 1 : -1;
+      if (now < byeUntil) dir = 1; /* face forward so the bubble text isn't mirrored */
       man.classList.toggle('moving', speed > 8);
       man.classList.toggle('sunbathe', sunbathing && speed < 2);
       man.classList.toggle('stretch', stretching && speed < 2);
