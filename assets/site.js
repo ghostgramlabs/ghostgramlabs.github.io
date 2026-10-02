@@ -78,182 +78,6 @@
     level = PHASES[phase].level;
   }
 
-  /* ---------- sound: real rain, wind with the storm, thunder after each strike.
-     Public-domain recordings from Wikimedia Commons ("Rain", "Rain against the window", "Tonitrus"),
-     fetched only once the visitor turns sound on. ---------- */
-  var sound = (function () {
-    var KEY = 'gg-sound';
-    var ac = null, master, rainG, windG, buffers = null, loading = false, on = false;
-
-    function fetchBuffer(name) {
-      return fetch('/assets/audio/' + name).then(function (r) { return r.arrayBuffer(); }).then(function (b) {
-        return new Promise(function (ok, fail) { ac.decodeAudioData(b, ok, fail); });
-      });
-    }
-
-    /* loop a recording; the ends are trimmed a touch to skip the silence mp3 encoders pad on */
-    function loop(buf, out, rate, offset, pan) {
-      var src = ac.createBufferSource();
-      src.buffer = buf;
-      src.loop = true;
-      src.loopStart = 0.06;
-      src.loopEnd = buf.duration - 0.06;
-      src.playbackRate.value = rate;
-      var node = src;
-      if (ac.createStereoPanner) {
-        var p = ac.createStereoPanner();
-        p.pan.value = pan;
-        src.connect(p);
-        node = p;
-      }
-      node.connect(out);
-      src.start(0, offset % (buf.duration - 0.2));
-    }
-
-    function build() {
-      ac = new (window.AudioContext || window.webkitAudioContext)();
-      master = ac.createGain();
-      master.gain.value = 0;
-      var limiter = ac.createDynamicsCompressor(); /* keeps the loudest thunder from distorting */
-      limiter.threshold.value = -10;
-      limiter.ratio.value = 6;
-      master.connect(limiter);
-      limiter.connect(ac.destination);
-      rainG = ac.createGain(); rainG.gain.value = 0; rainG.connect(master);
-      windG = ac.createGain(); windG.gain.value = 0; windG.connect(master);
-    }
-
-    function load() {
-      if (buffers || loading) return;
-      loading = true;
-      label('rain sounds: loading…');
-      Promise.all([fetchBuffer('rain.mp3'), fetchBuffer('rain-wind.mp3'), fetchBuffer('thunder.mp3')]).then(function (b) {
-        buffers = { rain: b[0], wind: b[1], thunder: b[2] };
-        /* two copies of the rain, a little apart in time, speed and space, so the loop never audibly repeats */
-        loop(buffers.rain, rainG, 1, 0, -0.35);
-        loop(buffers.rain, rainG, 0.93, 4.1, 0.35);
-        loop(buffers.wind, windG, 1, Math.random() * 30, 0);
-        lastFollow = 0;
-        follow(level);
-        paint();
-      }).catch(function () {
-        loading = false;
-        label('rain sounds: unavailable');
-      });
-    }
-
-    /* each strike plays a different stretch of the thunder recording; far ones are muffled and soft */
-    function thunder(strength, far) {
-      if (!on || !buffers) return;
-      var t = ac.currentTime, len = 6 + Math.random() * 3;
-      var src = ac.createBufferSource();
-      src.buffer = buffers.thunder;
-      var f = ac.createBiquadFilter();
-      f.type = 'lowpass';
-      f.frequency.value = far ? 420 : 4000;
-      var g = ac.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(strength * (far ? 0.5 : 1), t + 0.08);
-      g.gain.setValueAtTime(strength * (far ? 0.5 : 1), t + len - 2);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-      src.connect(f);
-      f.connect(g);
-      g.connect(master);
-      src.start(t, Math.random() * (buffers.thunder.duration - len - 0.5));
-      src.stop(t + len + 0.1);
-    }
-
-    var lastFollow = 0;
-
-    function follow(lv) {
-      if (!on || !buffers) return;
-      var t = ac.currentTime;
-      if (t - lastFollow < 0.25) return; /* a few updates a second is plenty for weather */
-      lastFollow = t;
-      rainG.gain.setTargetAtTime(0.45 + lv * 0.55, t, 1.5); /* soft in the drizzle, full in the storm */
-      windG.gain.setTargetAtTime(Math.max(0, lv - 0.45) * 1.6, t, 2); /* the wind only rises with the storm */
-    }
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'sound-btn';
-    document.body.appendChild(btn);
-
-    var ICON_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
-    var ICON_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
-
-    function label(text) {
-      var s = btn.querySelector('span');
-      if (s) s.textContent = text;
-    }
-
-    function paint() {
-      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      btn.innerHTML = (on ? ICON_ON : ICON_OFF) + '<span>rain sounds: ' + (on ? 'on' : 'off') + '</span>';
-    }
-
-    function setOn(v) {
-      on = v;
-      try { localStorage.setItem(KEY, v ? 'on' : 'off'); } catch (e) {}
-      paint();
-      if (v) {
-        if (!ac) build();
-        if (ac.state === 'suspended') ac.resume();
-        load();
-        lastFollow = 0;
-        follow(level);
-        master.gain.setTargetAtTime(1, ac.currentTime, 0.5);
-        /* if the browser is still holding sound back, say so on the button instead of failing quietly */
-        setTimeout(function () {
-          if (on && ac.state !== 'running') label('sound blocked: tap again');
-        }, 700);
-      } else if (ac) {
-        master.gain.setTargetAtTime(0, ac.currentTime, 0.3);
-      }
-    }
-
-    /* a scribbled hint, only until the visitor has tried the button once */
-    var psst = null, seen = false;
-    try { seen = localStorage.getItem('gg-psst') === '1'; } catch (e) {}
-    if (!seen) {
-      psst = document.createElement('div');
-      psst.className = 'psst';
-      psst.setAttribute('aria-hidden', 'true');
-      psst.textContent = small ? 'psst, tap for rain ↓' : 'psst, tap for rain →';
-      document.body.appendChild(psst);
-      setTimeout(function () { if (psst) psst.classList.add('gone'); }, 12000);
-    }
-
-    btn.addEventListener('click', function () {
-      setOn(!on);
-      if (psst) { psst.classList.add('gone'); psst = null; }
-      try { localStorage.setItem('gg-psst', '1'); } catch (e) {}
-    });
-
-    /* browsers allow sound only after a click or key press, so a returning listener's
-       rain picks up again at their first touch of the page */
-    var wanted = false;
-    try { wanted = localStorage.getItem(KEY) === 'on'; } catch (e) {}
-    if (wanted) {
-      var wake = function (e) {
-        if (e && e.target && e.target.closest && e.target.closest('.sound-btn')) return;
-        document.removeEventListener('pointerdown', wake);
-        document.removeEventListener('keydown', wake);
-        setOn(true);
-      };
-      document.addEventListener('pointerdown', wake);
-      document.addEventListener('keydown', wake);
-    }
-    paint();
-
-    return {
-      thunder: thunder,
-      follow: follow,
-      pause: function () { if (ac && on) ac.suspend(); },
-      resume: function () { if (ac && on) ac.resume(); }
-    };
-  })();
-
   /* ---------- the sky canvas: clouds, rain and the lightning glow, behind everything ---------- */
   var cv = document.createElement('canvas');
   cv.className = 'rain-canvas';
@@ -308,36 +132,6 @@
     cx.fill();
   }
 
-  /* where the rain meets the street: little crowns and rings along the pavement */
-  var ground = document.querySelector('.street-ground'), splashes = [];
-
-  function drawSplashes(dt) {
-    if (!ground) return;
-    var gy = ground.getBoundingClientRect().top + 6;
-    if (gy < -20 || gy > H + 20) { splashes.length = 0; return; }
-    var n = Math.floor(level * W / 14 * dt + Math.random()); /* splashes per frame along the whole street */
-    while (n-- > 0 && splashes.length < 160) splashes.push({ x: Math.random() * W, age: 0, s: 0.6 + Math.random() * 0.8 });
-    cx.lineCap = 'round';
-    cx.lineWidth = 1.1;
-    for (var i = splashes.length - 1; i >= 0; i--) {
-      var p = splashes[i];
-      p.age += dt;
-      var u = p.age / 0.45;
-      if (u >= 1) { splashes.splice(i, 1); continue; }
-      cx.strokeStyle = 'rgba(239, 226, 243, ' + ((1 - u) * 0.5).toFixed(3) + ')';
-      if (u < 0.4) { /* the crown */
-        var h = 6 * p.s * (u / 0.4);
-        cx.beginPath();
-        cx.moveTo(p.x - 1, gy); cx.lineTo(p.x - 4 * p.s, gy - h);
-        cx.moveTo(p.x + 1, gy); cx.lineTo(p.x + 4 * p.s, gy - h);
-        cx.stroke();
-      }
-      cx.beginPath(); /* the ring */
-      cx.ellipse(p.x, gy + 3, 2 + u * 11 * p.s, 0.8 + u * 2.4 * p.s, 0, 0, 6.283);
-      cx.stroke();
-    }
-  }
-
   function mix(a, b, t) {
     return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' + Math.round(a[1] + (b[1] - a[1]) * t) + ',' + Math.round(a[2] + (b[2] - a[2]) * t) + ')';
   }
@@ -375,8 +169,6 @@
       if (c.x - 130 * c.s > W) c.x = -130 * c.s;
       cloud(c, fill);
     }
-
-    drawSplashes(dt);
 
     var want = Math.round(MAX_DROPS * level);
     while (drops.length < want) drops.push(newDrop(drops.length > 10));
@@ -511,12 +303,13 @@
     /* looks up at the swarm, or out at the street, every few seconds */
     if (t > nextLook) {
       var watching = bugs.length > 4;
-      headTo = watching && Math.random() < 0.7 ? -11 - Math.random() * 5 : (Math.random() < 0.5 ? 0 : 4);
+      headTo = watching && Math.random() < 0.7 ? 11 + Math.random() * 5 : (Math.random() < 0.5 ? 0 : -4); /* positive tips the nose up */
       nextLook = t + 2500 + Math.random() * 4500;
     }
     var since = t - flinchAt;
     var flinch = since > 0 && since < 700 ? Math.sin(since / 700 * Math.PI) : 0; /* ducks a little at the thunder */
-    headA += (headTo + flinch * 7 - headA) * 0.06;
+    var aim = boatNear ? -9 : headTo; /* a boat going by gets a look */
+    headA += (aim - flinch * 7 - headA) * 0.06;
     dogHead.setAttribute('transform', 'rotate(' + headA.toFixed(2) + ' 108 78)');
 
     var wag = level < 0.45 ? Math.sin(t * 0.012) * 7 : Math.sin(t * 0.004) * 2;
@@ -527,7 +320,217 @@
     dogMove.setAttribute('transform', 'translate(52 ' + (368 + flinch * 2).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)');
   }
 
-  /* ---------- lightning, and the thunder that follows it ---------- */
+  /* ---------- the street: rain splashing on it, water running along the gutter, and paper boats ---------- */
+  var ground = document.querySelector('.street-ground');
+  var street = ground ? ground.parentNode : null;
+  var sc = null, sx = null, SW = 0, SH = 0;
+  var splashes = [], boats = [], ripples = [], flows = [], boatNear = false;
+  /* notebook, newspaper and coloured-craft paper: every boat a different sheet */
+  var PAPERS = ['#fbf3e4', '#f6dde3', '#dbe9f4', '#f2e5bf', '#e2efd8'];
+
+  if (street) {
+    sc = document.createElement('canvas');
+    sc.className = 'street-canvas';
+    sc.setAttribute('aria-hidden', 'true');
+    street.appendChild(sc);
+    sx = sc.getContext('2d');
+  }
+
+  function streetResize() {
+    if (!sc) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    SW = sc.clientWidth;
+    SH = sc.clientHeight;
+    sc.width = SW * dpr;
+    sc.height = SH * dpr;
+    sx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function waterY() {
+    var gh = ground.offsetHeight;
+    return SH - gh + (gh > 15 ? 10 : 5);
+  }
+
+  function flowSpeed() { return 26 + level * 60; } /* the gutter runs faster when it pours */
+
+  function dropBoat(clientX, clientY, t) {
+    var r = sc.getBoundingClientRect(), wy = waterY();
+    if (boats.length >= 8) boats.shift();
+    boats.push({
+      x: clientX - r.left,
+      y: Math.min(clientY - r.top, wy - 6),
+      vy: 0,
+      s: small ? 15 : 22,
+      k: 0.85 + Math.random() * 0.3,
+      paper: PAPERS[Math.floor(Math.random() * PAPERS.length)],
+      ph: Math.random() * 6.283,
+      floating: reduced,
+      wake: 0
+    });
+    if (reduced) drawStreet(t || 0, 0);
+  }
+
+  function ring(x, y, big) {
+    ripples.push({ x: x, y: y, age: 0, s: big ? 1.6 : 1 });
+  }
+
+  /* a folded paper boat: the hull, the peaked sail and its centre fold */
+  function drawBoat(b, wy, t) {
+    var s = b.s;
+    var bob = b.floating ? Math.sin(t * 0.004 + b.ph) * (1 + level * 1.4) : 0;
+    var tilt = b.floating ? Math.sin(t * 0.0031 + b.ph) * 0.08 * (1 + level) : (b.vy > 0 ? 0.25 : 0);
+    sx.save();
+    sx.translate(b.x, (b.floating ? wy : b.y) + bob);
+    sx.rotate(tilt);
+    sx.lineJoin = 'round';
+    sx.lineWidth = 1.6;
+    sx.strokeStyle = '#1c1a17';
+    sx.fillStyle = b.paper;
+    sx.beginPath(); /* sail */
+    sx.moveTo(-0.5 * s, -0.45 * s);
+    sx.lineTo(0, -1.35 * s);
+    sx.lineTo(0.5 * s, -0.45 * s);
+    sx.closePath();
+    sx.fill();
+    sx.stroke();
+    sx.beginPath(); /* hull */
+    sx.moveTo(-1.05 * s, -0.45 * s);
+    sx.lineTo(1.05 * s, -0.45 * s);
+    sx.lineTo(0.62 * s, 0.05 * s);
+    sx.lineTo(-0.62 * s, 0.05 * s);
+    sx.closePath();
+    sx.fill();
+    sx.stroke();
+    sx.lineWidth = 1;
+    sx.beginPath(); /* the folds */
+    sx.moveTo(0, -1.35 * s); sx.lineTo(0, -0.45 * s);
+    sx.moveTo(-0.62 * s, 0.05 * s); sx.lineTo(-0.3 * s, -0.45 * s);
+    sx.moveTo(0.62 * s, 0.05 * s); sx.lineTo(0.3 * s, -0.45 * s);
+    sx.stroke();
+    sx.restore();
+    if (b.floating) { /* the bottom sits in the water */
+      sx.fillStyle = 'rgba(26, 18, 32, 0.55)';
+      sx.fillRect(b.x - 0.9 * s, wy + bob - 0.05 * s, 1.8 * s, 0.25 * s);
+    }
+  }
+
+  function drawStreet(t, dt) {
+    if (!sx) return;
+    sx.clearRect(0, 0, SW, SH);
+    var wy = waterY(), fv = flowSpeed();
+
+    /* water running along the gutter */
+    var wantFlows = Math.round(SW / 38);
+    while (flows.length < wantFlows) flows.push({ x: Math.random() * SW, y: wy - 1 + Math.random() * 7, l: 6 + Math.random() * 14, a: 0.1 + Math.random() * 0.14, k: 0.9 + Math.random() * 0.4 });
+    sx.lineCap = 'round';
+    sx.lineWidth = 1;
+    for (var f = 0; f < flows.length; f++) {
+      var w = flows[f];
+      w.x += fv * w.k * dt;
+      if (w.x - w.l > SW) w.x = -Math.random() * 40;
+      sx.strokeStyle = 'rgba(239, 226, 243, ' + w.a.toFixed(3) + ')';
+      sx.beginPath();
+      sx.moveTo(w.x - w.l, w.y);
+      sx.lineTo(w.x, w.y);
+      sx.stroke();
+    }
+
+    /* rain landing on the street: a little crown, then a ring */
+    var n = Math.floor(level * SW / 14 * dt + Math.random() * (dt > 0 ? 1 : 0));
+    while (n-- > 0 && splashes.length < 160) splashes.push({ x: Math.random() * SW, age: 0, s: 0.6 + Math.random() * 0.8 });
+    sx.lineWidth = 1.1;
+    for (var i = splashes.length - 1; i >= 0; i--) {
+      var p = splashes[i];
+      p.age += dt;
+      var u = p.age / 0.45;
+      if (u >= 1) { splashes.splice(i, 1); continue; }
+      sx.strokeStyle = 'rgba(239, 226, 243, ' + ((1 - u) * 0.5).toFixed(3) + ')';
+      if (u < 0.4) {
+        var h = 6 * p.s * (u / 0.4);
+        sx.beginPath();
+        sx.moveTo(p.x - 1, wy - 2); sx.lineTo(p.x - 4 * p.s, wy - 2 - h);
+        sx.moveTo(p.x + 1, wy - 2); sx.lineTo(p.x + 4 * p.s, wy - 2 - h);
+        sx.stroke();
+      }
+      sx.beginPath();
+      sx.ellipse(p.x, wy + 1, 2 + u * 11 * p.s, 0.8 + u * 2.4 * p.s, 0, 0, 6.283);
+      sx.stroke();
+    }
+
+    /* rings left by boats landing and drifting */
+    for (var q = ripples.length - 1; q >= 0; q--) {
+      var rp = ripples[q];
+      rp.age += dt;
+      var v = rp.age / 0.9;
+      if (v >= 1) { ripples.splice(q, 1); continue; }
+      sx.strokeStyle = 'rgba(255, 236, 214, ' + ((1 - v) * 0.45).toFixed(3) + ')';
+      sx.beginPath();
+      sx.ellipse(rp.x, rp.y + 2, (6 + v * 26) * rp.s, (1.4 + v * 4) * rp.s, 0, 0, 6.283);
+      sx.stroke();
+    }
+
+    /* the boats: fall in, splash, then ride the current out of sight */
+    var dogX = -1e9;
+    if (lamp) {
+      var lr = lamp.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+      dogX = lr.left - sr.left + 150 * (lr.height / 590);
+    }
+    boatNear = false;
+    for (var j = boats.length - 1; j >= 0; j--) {
+      var b = boats[j];
+      if (!b.floating) {
+        b.vy += 900 * dt;
+        b.y += b.vy * dt;
+        if (b.y >= wy) {
+          b.floating = true;
+          ring(b.x, wy, true);
+          ring(b.x, wy, false);
+          for (var c = 0; c < 4; c++) splashes.push({ x: b.x + (Math.random() - 0.5) * 2.4 * b.s, age: 0, s: 1 + Math.random() * 0.6 });
+        }
+      } else {
+        b.x += fv * b.k * dt;
+        b.wake += dt;
+        if (b.wake > 0.6) { b.wake = 0; ring(b.x - b.s, wy, false); }
+        if (b.x - 2 * b.s > SW) { boats.splice(j, 1); continue; }
+        if (Math.abs(b.x - dogX) < 90) boatNear = true;
+      }
+      drawBoat(b, wy, t);
+    }
+  }
+
+  /* tap the wet street (or just above it) to drop a boat in */
+  var hero = street ? street.parentNode : null;
+
+  function onStreet(e) {
+    if (!ground || (e.target.closest && e.target.closest('a, button'))) return false;
+    var g = ground.getBoundingClientRect();
+    return e.clientY >= g.top - 70 && e.clientY <= g.bottom + 2;
+  }
+
+  if (hero) {
+    hero.addEventListener('click', function (e) {
+      if (!onStreet(e)) return;
+      dropBoat(e.clientX, e.clientY, performance.now());
+      if (hint) { hint.classList.add('gone'); hint = null; }
+      try { localStorage.setItem('gg-boat', '1'); } catch (err) {}
+    });
+    hero.addEventListener('mousemove', function (e) {
+      hero.classList.toggle('boat-zone', onStreet(e));
+    });
+  }
+
+  /* a small invitation, until the visitor has floated their first boat */
+  var hint = null, floated = false;
+  try { floated = localStorage.getItem('gg-boat') === '1'; } catch (err) {}
+  if (street && !floated) {
+    hint = document.createElement('div');
+    hint.className = 'boat-hint';
+    hint.setAttribute('aria-hidden', 'true');
+    hint.textContent = small ? 'tap the wet street to float a paper boat ↓' : '↓ click the wet street to float a paper boat';
+    street.appendChild(hint);
+  }
+
+  /* ---------- lightning ---------- */
   /* a jagged path from the clouds down through the open sky, with one fork */
   function makeBolt() {
     var wide = W > 900;
@@ -547,14 +550,13 @@
     return pts;
   }
 
-  /* far: only the sky glows. near: a bolt you can see, then the thunder a moment later */
+  /* far: only the sky glows. near: a bolt you can see, and the dog ducks a moment later */
   function lightning(t, far) {
     bolt = far ? null : makeBolt();
     flashQueue.push(t, t + 160 + Math.random() * 120); /* a strike, then one fainter flicker */
     flashScale = far ? 0.45 : 1;
     var delay = far ? 2500 + Math.random() * 2000 : 700 + Math.random() * 1500;
     if (!far) flinchAt = t + delay;
-    setTimeout(function () { sound.thunder(far ? 0.5 : 0.7 + Math.random() * 0.3, far); }, delay);
   }
 
   function startPhase(t) {
@@ -594,8 +596,8 @@
 
     drawSky(dt);
     drawLamp(t, dt);
+    drawStreet(t, dt);
     dogTick(t);
-    sound.follow(level);
     requestAnimationFrame(tick);
   }
 
@@ -608,22 +610,25 @@
 
   resize();
   lampResize();
+  streetResize();
   window.addEventListener('resize', function () {
     resize();
     lampResize();
-    if (reduced) { drawSky(0); drawLamp(0, 0); }
+    streetResize();
+    if (reduced) { drawSky(0); drawLamp(0, 0); drawStreet(0, 0); }
   });
 
   if (reduced) {
     /* a still rainy night: one frame, nothing moving */
     drawSky(0);
     drawLamp(0, 0);
+    drawStreet(0, 0);
   } else {
     start();
   }
 
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { running = false; sound.pause(); }
-    else { start(); sound.resume(); }
+    if (document.hidden) running = false;
+    else start();
   });
 })();

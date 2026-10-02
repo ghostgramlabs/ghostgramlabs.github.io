@@ -696,67 +696,42 @@ footer .brand { color: var(--ink); }
 
 .lamp svg { overflow: visible; }
 
-/* ---------- Rain sounds toggle ---------- */
-.sound-btn {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 9000;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 14px;
-  background: var(--surface);
-  color: var(--ink);
-  border: 2px solid var(--ink);
-  border-radius: 12px;
-  box-shadow: 3px 3px 0 #ff8a1f;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.82rem;
-  cursor: pointer;
-  transform: rotate(1.5deg);
-  transition: transform 0.15s;
-}
-
-.sound-btn:hover { transform: rotate(0deg) translate(-1px, -1px); }
-
-.sound-btn svg { width: 17px; height: 17px; display: block; }
-
-.sound-btn[aria-pressed="true"] { box-shadow: 3px 3px 0 var(--paper-accent); }
-
-.psst {
-  position: fixed;
-  right: 196px;
-  bottom: 24px;
-  z-index: 9000;
-  font-family: "Caveat", var(--font-quirk), cursive;
-  font-weight: 600;
-  font-size: 1.45rem;
-  color: var(--accent);
-  transform: rotate(-4deg);
-  pointer-events: none;
-  transition: opacity 0.6s;
-}
-
-.psst.gone { opacity: 0; }
-
-/* while the cookie question is open, the hint steps aside so the two don't crowd each other */
-body.consent-open .psst { display: none; }
-
 @media (max-width: 1000px) {
   .hero { padding-bottom: 270px; }
   .lamp { width: 136px; height: 250px; right: 4px; }
   .street-ground { height: 12px; }
 }
 
-@media (max-width: 640px) {
-  .psst { right: 20px; bottom: 66px; font-size: 1.25rem; }
+/* the street's own canvas: splashes, the running gutter and the paper boats, in front of the pavement */
+.street-canvas {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  height: 96px;
+  display: block;
+  pointer-events: none;
 }
 
-/* on phones the cookie banner spans the bottom, so the rain button sits just above it */
-@media (max-width: 480px) {
-  body.consent-open .sound-btn { bottom: 214px; }
+.hero.boat-zone { cursor: pointer; }
+
+.boat-hint {
+  position: absolute;
+  left: 24px;
+  bottom: 38px;
+  font-family: var(--font-quirk);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--accent);
+  transform: rotate(-1.5deg);
+  transition: opacity 0.6s;
+}
+
+.boat-hint.gone { opacity: 0; }
+
+@media (max-width: 1000px) {
+  .boat-hint { bottom: 22px; font-size: 0.92rem; max-width: 52%; }
 }
 
 /* ---------- Responsive ---------- */
