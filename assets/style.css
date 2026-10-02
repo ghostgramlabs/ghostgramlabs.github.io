@@ -18,13 +18,10 @@
   --ds-tint: #ddf1f6;
   --sa-accent: #6d28d9;
   --sa-tint: #efe6fc;
-  --radius: 8px;
-  /* lettering of a painted Indian shop sign: Rozha One for the big words, Teko for labels,
-     Hind to read, Kalam for things written by hand (all from the Indian Type Foundry) */
-  --font: "Hind", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Rozha One", Georgia, serif;
-  --font-sign: "Teko", "Arial Narrow", sans-serif;
-  --font-quirk: "Kalam", cursive;
+  --radius: 16px;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Inter", -apple-system, sans-serif;
+  --font-quirk: "Fraunces", Georgia, serif;
 }
 
 /* app pages: a lighter take of the app colour on the night, the true colour on paper */
@@ -76,11 +73,11 @@ header {
   align-items: center;
   gap: 11px;
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.42rem;
-  line-height: 1;
+  font-weight: 700;
+  font-size: 1.06rem;
   color: var(--page-text);
   text-decoration: none;
+  letter-spacing: -0.01em;
 }
 
 .brand-mark {
@@ -103,14 +100,13 @@ header {
 .nav-links { display: flex; gap: 24px; align-items: center; }
 
 .nav-links a {
-  font-family: var(--font-sign);
+  font-family: var(--font-display);
   color: var(--page-text);
   text-decoration: none;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1;
+  font-size: 0.82rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   border-bottom: 2px solid transparent;
   transition: border-color 0.15s;
 }
@@ -136,16 +132,16 @@ section.hero.container { padding-top: 88px; padding-bottom: 110px; position: rel
 
 .hero .eyebrow {
   display: inline-block;
-  font-family: var(--font-sign);
+  font-family: var(--font-display);
   background: var(--surface);
   border: 2px solid var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
-  border-radius: 4px;
-  padding: 8px 16px 4px;
+  border-radius: 999px;
+  padding: 7px 18px;
   color: var(--ink);
-  font-size: 1.05rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   transform: rotate(-1.6deg);
   margin-bottom: 30px;
@@ -155,25 +151,35 @@ section.hero.container { padding-top: 88px; padding-bottom: 110px; position: rel
 .hand-note {
   display: inline-block;
   font-family: var(--font-quirk);
-  font-weight: 700;
-  font-size: clamp(1.1rem, 2.4vw, 1.45rem);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
   color: var(--accent);
-  transform: rotate(-2.5deg);
-  margin-bottom: 10px;
+  transform: rotate(-2deg);
+  margin-bottom: 12px;
 }
 
 h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 8vw, 5.8rem);
-  line-height: 0.98;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-size: clamp(2.6rem, 7.8vw, 5.6rem);
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.035em;
   margin-bottom: 26px;
   max-width: 980px;
 }
 
-/* the second line of a heading, painted in the streetlight colour */
-.grad { color: var(--accent); }
+.grad {
+  font-family: var(--font-quirk);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--accent);
+  text-decoration: underline wavy;
+  text-decoration-thickness: 0.05em;
+  text-underline-offset: 0.14em;
+  text-decoration-skip-ink: none;
+}
 
 .hero p.lead {
   max-width: 640px;
@@ -191,7 +197,7 @@ h1 {
   overflow: hidden;
   background: var(--surface);
   color: var(--ink);
-  padding: 10px 0 5px;
+  padding: 11px 0;
   transform: rotate(-0.4deg) scale(1.02);
   border-top: 2px solid var(--ink);
   border-bottom: 2px solid var(--ink);
@@ -205,11 +211,10 @@ h1 {
 }
 
 .ticker-track span {
-  font-family: var(--font-sign);
-  font-weight: 500;
-  font-size: 1.2rem;
-  line-height: 1.2;
-  letter-spacing: 0.1em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.84rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-right: 3rem;
 }
@@ -226,15 +231,12 @@ h1 {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 22px 7px;
-  border-radius: 4px;
+  padding: 13px 24px;
+  border-radius: 999px;
   border: 2px solid var(--ink);
-  font-family: var(--font-sign);
-  font-weight: 500;
-  font-size: 1.24rem;
-  line-height: 1;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
   text-decoration: none;
   box-shadow: 3px 3px 0 var(--ink);
   transition: transform 0.13s, box-shadow 0.13s;
@@ -259,12 +261,7 @@ h1 {
 
 .app-hero .btn-play:hover { box-shadow: 5px 5px 0 var(--accent); }
 
-.btn-play svg { width: 18px; height: 18px; margin-top: -4px; }
-
-/* hand-hung labels: never quite level */
-.cta-row .btn:nth-child(odd) { transform: rotate(-1.2deg); }
-.cta-row .btn:nth-child(even) { transform: rotate(0.8deg); }
-.cta-row .btn:hover { transform: translate(-2px, -2px); }
+.btn-play svg { width: 18px; height: 18px; }
 
 /* ---------- Sections ---------- */
 /* sections are also .container, whose side padding would cancel a plain "section" rule,
@@ -273,9 +270,9 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 
 .section-title {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4.2vw, 3rem);
-  font-weight: 400;
-  line-height: 1.05;
+  font-size: clamp(1.7rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   margin-bottom: 12px;
 }
 
@@ -285,20 +282,15 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 .apps-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 72px 28px;
-  padding-top: 46px;
+  gap: 26px;
   counter-reset: app;
 }
 
-/* a painted tin sign: two rivets at the top, the sign-writer's inner border, strings up to the nail */
 .app-card {
   position: relative;
-  border: 3px solid var(--ink);
-  border-radius: 6px;
-  padding: 38px 28px 30px;
-  background-image:
-    radial-gradient(circle at 25% 15px, var(--ink) 3.5px, transparent 4.5px),
-    radial-gradient(circle at 75% 15px, var(--ink) 3.5px, transparent 4.5px);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 32px 28px;
   display: flex;
   flex-direction: column;
   color: var(--ink);
@@ -306,42 +298,9 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
   transition: transform 0.18s, box-shadow 0.18s;
 }
 
-.app-card:nth-child(1) { background-color: #f6c27a; transform: rotate(-1.6deg); }
-.app-card:nth-child(2) { background-color: #bfe6df; transform: rotate(1.2deg); }
-.app-card:nth-child(3) { background-color: #d9c9f7; transform: rotate(-0.8deg); }
-
-.app-card::after {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border: 2px solid currentColor;
-  border-radius: 3px;
-  opacity: 0.3;
-  pointer-events: none;
-}
-
-.app-card .hang {
-  position: absolute;
-  top: -44px;
-  left: 0;
-  right: 0;
-  height: 60px;
-  pointer-events: none;
-}
-
-.app-card .hang::before,
-.app-card .hang::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  width: 2px;
-  height: 52px;
-  background: #cdb9a0;
-  transform-origin: bottom center;
-}
-
-.app-card .hang::before { left: calc(25% - 1px); transform: rotate(16deg); }
-.app-card .hang::after { left: calc(75% - 1px); transform: rotate(-16deg); }
+.app-card:nth-child(1) { background: var(--pb-tint); transform: rotate(-0.8deg); }
+.app-card:nth-child(2) { background: var(--ds-tint); transform: rotate(0.6deg); }
+.app-card:nth-child(3) { background: var(--sa-tint); transform: rotate(-0.4deg); }
 
 .app-card:hover { transform: rotate(0deg) translate(-2px, -2px); box-shadow: 9px 9px 0 var(--ink); }
 
@@ -349,14 +308,14 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
   counter-increment: app;
   content: "0" counter(app);
   position: absolute;
-  top: 20px;
-  right: 24px;
-  font-family: var(--font-display);
-  font-size: 2.2rem;
-  font-weight: 400;
-  line-height: 1;
+  top: 18px;
+  right: 22px;
+  font-family: var(--font-quirk);
+  font-style: italic;
+  font-size: 2.4rem;
+  font-weight: 600;
   color: var(--ink);
-  opacity: 0.2;
+  opacity: 0.14;
 }
 
 .app-icon {
@@ -385,20 +344,17 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 
 .app-card h3 {
   font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 400;
-  line-height: 1;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .app-card .app-tag {
-  font-family: var(--font-sign);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.15;
-  margin-top: 6px;
+  font-family: var(--font-quirk);
+  font-style: italic;
   color: var(--ink);
   opacity: 0.75;
-  font-size: 1.12rem;
+  font-size: 0.95rem;
   margin-bottom: 14px;
 }
 
@@ -463,7 +419,7 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 
 .uses .use-app {
   flex-shrink: 0;
-  font-family: var(--font-sign);
+  font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 500;
   line-height: 1;
@@ -495,7 +451,7 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 
 .value .v-icon svg { width: 24px; height: 24px; display: block; }
 
-.value h3 { font-family: var(--font-display); font-size: 1.35rem; font-weight: 400; line-height: 1.1; margin-bottom: 8px; }
+.value h3 { font-family: var(--font-display); font-size: 1.02rem; font-weight: 700; margin-bottom: 8px; }
 
 .value p { color: var(--muted); font-size: 0.9rem; }
 
@@ -533,7 +489,7 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 
 .feature .f-icon svg { width: 21px; height: 21px; }
 
-.feature h3 { font-family: var(--font-display); font-size: 1.35rem; font-weight: 400; line-height: 1.1; margin-bottom: 8px; }
+.feature h3 { font-family: var(--font-display); font-size: 1.06rem; font-weight: 700; margin-bottom: 8px; }
 
 .feature p { color: var(--muted); font-size: 0.92rem; }
 
@@ -542,9 +498,8 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 
 .prose h2 {
   font-family: var(--font-display);
-  font-size: 1.95rem;
-  font-weight: 400;
-  line-height: 1.1;
+  font-size: 1.55rem;
+  font-weight: 700;
   margin: 40px 0 14px;
   letter-spacing: -0.01em;
 }
@@ -578,9 +533,9 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 .faq summary {
   cursor: pointer;
   padding: 17px 20px;
-  font-family: var(--font);
-  font-weight: 600;
-  font-size: 1.04rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.97rem;
   list-style: none;
   display: flex;
   justify-content: space-between;
@@ -593,8 +548,7 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 .faq summary::after {
   content: "+";
   font-family: var(--font-quirk);
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.4rem;
   color: var(--paper-accent);
   transition: transform 0.2s;
   flex-shrink: 0;
@@ -622,8 +576,7 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 .download-band h2 {
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 3vw, 2.2rem);
-  font-weight: 400;
-  line-height: 1.05;
+  font-weight: 700;
   margin-bottom: 12px;
   letter-spacing: -0.02em;
 }
@@ -652,9 +605,9 @@ section.app-hero.container { padding-top: 76px; padding-bottom: 52px; position: 
 }
 
 .breadcrumb {
-  font-family: var(--font-sign);
-  font-size: 1.08rem;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--page-muted);
@@ -714,17 +667,16 @@ footer .brand { color: var(--ink); }
 }
 
 .footer-inner .f-col h4 {
-  font-family: var(--font-sign);
-  font-size: 1.1rem;
-  line-height: 1;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink);
   margin-bottom: 14px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
-.footer-inner .f-col a.brand { display: flex; font-size: 1.42rem; color: var(--ink); margin-bottom: 0; }
+.footer-inner .f-col a.brand { display: flex; font-size: 1.06rem; color: var(--ink); margin-bottom: 0; }
 
 .footer-inner .f-col a {
   display: block;
@@ -826,8 +778,8 @@ footer .brand { color: var(--ink); }
   left: 24px;
   bottom: 38px;
   font-family: var(--font-quirk);
-  font-weight: 700;
-  font-size: 1.12rem;
+  font-style: italic;
+  font-size: 1rem;
   color: var(--accent);
   transform: rotate(-1.5deg);
   transition: opacity 0.6s;
