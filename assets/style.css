@@ -431,6 +431,46 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
 
 .card-actions .btn { padding: 10px 18px; font-size: 0.85rem; }
 
+/* ---------- What people search for ---------- */
+.uses {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px 26px;
+}
+
+.uses a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 18px 13px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 #0d0911;
+  text-decoration: none;
+  transition: transform 0.13s, box-shadow 0.13s;
+}
+
+.uses li:nth-child(odd) a { transform: rotate(-0.5deg); }
+.uses li:nth-child(even) a { transform: rotate(0.4deg); }
+.uses a:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #0d0911; }
+
+.uses .use-q { font-size: 0.98rem; line-height: 1.4; }
+
+.uses .use-app {
+  flex-shrink: 0;
+  font-family: var(--font-sign);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--paper-accent);
+}
+
 /* ---------- Value props ---------- */
 .values-grid {
   display: grid;
