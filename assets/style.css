@@ -1,11 +1,16 @@
 /* GhostGram Labs — one weird person's corner of the web */
 :root {
-  --bg: #faf6ee;
-  --surface: #fffdf8;
+  /* the page is a warm monsoon night; cards, FAQ, footer and banners are cream paper on it */
+  --bg: #241a2e;
+  --page-text: #fbf3e4;
+  --page-muted: #d3c4dc;
+  --page-line: rgba(251, 243, 228, 0.24);
+  --accent: #ffb35c; /* streetlight amber, for things sitting on the night */
+  --surface: #fbf3e4;
   --ink: #1c1a17;
   --muted: #67615a;
   --line: #e3ddd1;
-  --accent: #4338ca;
+  --paper-accent: #5b3fd6; /* for accents printed on the cream paper */
   --tint: #e9e7fb;
   --pb-accent: #b45309;
   --pb-tint: #fbeeda;
@@ -19,24 +24,25 @@
   --font-quirk: "Fraunces", Georgia, serif;
 }
 
-.theme-pettibox { --accent: var(--pb-accent); --tint: var(--pb-tint); }
-.theme-directserve { --accent: var(--ds-accent); --tint: var(--ds-tint); }
-.theme-speakalert { --accent: var(--sa-accent); --tint: var(--sa-tint); }
+/* app pages: a lighter take of the app colour on the night, the true colour on paper */
+.theme-pettibox { --accent: #f2a952; --paper-accent: var(--pb-accent); --tint: var(--pb-tint); }
+.theme-directserve { --accent: #6fd7ec; --paper-accent: var(--ds-accent); --tint: var(--ds-tint); }
+.theme-speakalert { --accent: #c7a9f9; --paper-accent: var(--sa-accent); --tint: var(--sa-tint); }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--bg); }
 
+/* the night colour sits on <html> only: a body background would paint over the rain canvas */
 body {
   font-family: var(--font);
-  background: var(--bg);
-  color: var(--ink);
+  color: var(--page-text);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-::selection { background: var(--ink); color: var(--bg); }
+::selection { background: var(--accent); color: var(--ink); }
 
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
@@ -50,7 +56,7 @@ header {
   top: 0;
   z-index: 50;
   background: var(--bg);
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 2px dashed var(--page-line);
 }
 
 .nav {
@@ -69,7 +75,7 @@ header {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.06rem;
-  color: var(--ink);
+  color: var(--page-text);
   text-decoration: none;
   letter-spacing: -0.01em;
 }
@@ -95,7 +101,7 @@ header {
 
 .nav-links a {
   font-family: var(--font-display);
-  color: var(--ink);
+  color: var(--page-text);
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 600;
@@ -108,233 +114,20 @@ header {
 .nav-links a:hover { border-bottom-color: var(--accent); }
 
 /* ---------- Hero ---------- */
-.hero { padding: 88px 0 64px; position: relative; }
+.hero { padding-top: 88px; padding-bottom: 110px; position: relative; }
 
-.page-canvas {
+.hero > :not(.street) { position: relative; z-index: 1; }
+
+.hero h1 { max-width: 780px; }
+
+/* the rain, clouds and lightning live on one canvas behind everything */
+.rain-canvas {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
   pointer-events: none;
-}
-
-/* ---------- Cursor runner: a little man chasing the pointer ---------- */
-.cursor-runner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 22px;
-  height: 31px;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.cursor-runner svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.cursor-runner .head { fill: var(--ink); }
-
-.cursor-runner line {
-  stroke: var(--ink);
-  stroke-width: 2.4;
-  stroke-linecap: round;
-}
-
-.cursor-runner .arm { transform-box: view-box; transform-origin: 12px 11.5px; }
-.cursor-runner .leg { transform-box: view-box; transform-origin: 12px 19px; }
-
-/* weather outfits: umbrella in rain/thunder, beanie in snow, sunglasses when sunny,
-   and a little lantern after dark */
-.cursor-runner .umbrella,
-.cursor-runner .beanie,
-.cursor-runner .shades,
-.cursor-runner .lantern { display: none; }
-
-body.sky-night .cursor-runner .lantern { display: block; }
-
-.cursor-runner .lantern line { stroke-width: 1.2; }
-
-.cursor-runner .lantern rect {
-  fill: var(--surface);
-  stroke: var(--ink);
-  stroke-width: 1.2;
-}
-
-.cursor-runner .lantern .flame {
-  fill: #f6ba37;
-  stroke: none;
-  animation: gg-flicker 1.1s ease-in-out infinite;
-}
-
-.cursor-runner .lantern .lglow {
-  fill: rgba(246, 186, 55, 0.16);
-  stroke: none;
-}
-
-@keyframes gg-flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
-}
-
-body.weather-rain .cursor-runner .umbrella,
-body.weather-thunder .cursor-runner .umbrella { display: block; }
-
-body.weather-snow .cursor-runner .beanie { display: block; }
-
-body.weather-sunny .cursor-runner .shades { display: block; }
-
-.cursor-runner .shades line { stroke-width: 1.3; }
-
-.cursor-runner .shades circle {
-  fill: var(--ink);
-  stroke: none;
-}
-
-.cursor-runner .umbrella line { stroke-width: 1.8; }
-
-.cursor-runner .umbrella .canopy {
-  fill: var(--accent);
-  stroke: var(--ink);
-  stroke-width: 1.6;
-}
-
-.cursor-runner .beanie path {
-  fill: var(--accent);
-  stroke: var(--ink);
-  stroke-width: 1.2;
-}
-
-.cursor-runner .beanie circle { fill: var(--ink); }
-
-body.weather-rain .cursor-runner .a2,
-body.weather-thunder .cursor-runner .a2 { display: none; } /* that hand is holding the umbrella */
-
-.cursor-runner.moving svg { animation: gg-bob 0.36s ease-in-out infinite; }
-.cursor-runner.moving .l1 { animation: gg-swing-big 0.36s linear infinite; }
-.cursor-runner.moving .l2 { animation: gg-swing-big 0.36s linear infinite; animation-delay: -0.18s; }
-.cursor-runner.moving .a1 { animation: gg-swing 0.36s linear infinite; animation-delay: -0.18s; }
-.cursor-runner.moving .a2 { animation: gg-swing 0.36s linear infinite; }
-
-@keyframes gg-swing-big {
-  0%, 100% { transform: rotate(32deg); }
-  50% { transform: rotate(-32deg); }
-}
-
-@keyframes gg-swing {
-  0%, 100% { transform: rotate(22deg); }
-  50% { transform: rotate(-22deg); }
-}
-
-@keyframes gg-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
-}
-
-/* sunbathing: he lies flat, one knee up, arms relaxed, snoozing */
-.cursor-runner.sunbathe svg {
-  transform: rotate(90deg) translateX(5px);
-}
-
-.cursor-runner.sunbathe .l1 { transform: rotate(38deg); } /* knee up */
-.cursor-runner.sunbathe .l2 { transform: rotate(-6deg); }
-.cursor-runner.sunbathe .a1 { transform: rotate(-30deg); }
-.cursor-runner.sunbathe .a2 { transform: rotate(26deg); }
-
-.cursor-runner.sunbathe::after {
-  content: "z z z";
-  position: absolute;
-  bottom: 90%;
-  left: 60%;
-  font-family: var(--font-quirk);
-  font-style: italic;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-  animation: gg-zzz 2.6s ease-in-out infinite;
-}
-
-@keyframes gg-zzz {
-  0% { opacity: 0; transform: translateY(5px); }
-  35% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-10px); }
-}
-
-/* hello & goodbye: Gram waves his free arm overhead */
-.cursor-runner.wave-hi .a1,
-.cursor-runner.wave-bye .a1 { animation: gg-wave 0.5s ease-in-out 3; }
-
-@keyframes gg-wave {
-  0%, 100% { transform: rotate(-150deg); }
-  50% { transform: rotate(-205deg); }
-}
-
-.cursor-runner.wave-hi::after,
-.cursor-runner.wave-bye::after {
-  position: absolute;
-  bottom: 115%;
-  left: 70%;
-  background: var(--surface);
-  border: 2px solid var(--ink);
-  border-radius: 10px 10px 10px 2px;
-  padding: 3px 9px;
-  font-family: var(--font-quirk);
-  font-style: italic;
-  font-size: 12.5px;
-  line-height: 1.3;
-  color: var(--ink);
-  white-space: nowrap;
-  box-shadow: 2px 2px 0 var(--ink);
-  animation: gg-pop 0.25s ease-out;
-}
-
-.cursor-runner.wave-hi::after { content: "hi, I'm Gram!"; }
-
-.cursor-runner.wave-bye::after { content: "bye, thanks for visiting!"; }
-
-@keyframes gg-pop {
-  0% { opacity: 0; transform: translateY(5px) scale(0.8); }
-  100% { opacity: 1; }
-}
-
-/* morning stretch: arms overhead, up on the toes, a satisfied "ahh" */
-.cursor-runner.stretch svg { animation: gg-stretch-body 3s ease-in-out infinite; }
-.cursor-runner.stretch .a1 { animation: gg-stretch-arm1 3s ease-in-out infinite; }
-.cursor-runner.stretch .a2 { animation: gg-stretch-arm2 3s ease-in-out infinite; }
-
-@keyframes gg-stretch-arm1 {
-  0%, 12%, 88%, 100% { transform: rotate(0deg); }
-  40%, 65% { transform: rotate(160deg); }
-}
-
-@keyframes gg-stretch-arm2 {
-  0%, 12%, 88%, 100% { transform: rotate(0deg); }
-  40%, 65% { transform: rotate(-160deg); }
-}
-
-@keyframes gg-stretch-body {
-  0%, 12%, 88%, 100% { transform: none; }
-  40% { transform: translateY(-2px); }
-  55% { transform: translateY(-2px) rotate(4deg); }
-  65% { transform: translateY(-2px) rotate(-4deg); }
-}
-
-.cursor-runner.stretch::after {
-  content: "ahh";
-  position: absolute;
-  bottom: 100%;
-  left: 60%;
-  font-family: var(--font-quirk);
-  font-style: italic;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-  animation: gg-zzz 3s ease-in-out infinite;
 }
 
 .hero .eyebrow {
@@ -379,17 +172,19 @@ h1 {
 .hero p.lead {
   max-width: 640px;
   margin: 0 0 38px;
-  color: var(--muted);
+  color: var(--page-muted);
   font-size: clamp(1rem, 2vw, 1.18rem);
 }
+
+.hero p.lead strong, .app-hero p.lead strong { color: var(--page-text); }
 
 .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
 
 /* ---------- Ticker ---------- */
 .ticker {
   overflow: hidden;
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--surface);
+  color: var(--ink);
   padding: 11px 0;
   transform: rotate(-0.4deg) scale(1.02);
   border-top: 2px solid var(--ink);
@@ -439,15 +234,20 @@ h1 {
 
 .btn:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
 
-.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary { background: var(--accent); color: var(--ink); }
 
 .btn-ghost { background: var(--surface); color: var(--ink); }
 
-.btn-play { background: var(--ink); color: var(--bg); box-shadow: 3px 3px 0 var(--accent); }
+.btn-play { background: var(--ink); color: var(--surface); box-shadow: 3px 3px 0 var(--paper-accent); }
 
-.btn-play:hover { box-shadow: 5px 5px 0 var(--accent); }
+.btn-play:hover { box-shadow: 5px 5px 0 var(--paper-accent); }
 
-.btn-play:active { box-shadow: 2px 2px 0 var(--accent); }
+.btn-play:active { box-shadow: 2px 2px 0 var(--paper-accent); }
+
+/* a dark button would vanish on the night, so out there it turns paper-coloured */
+.app-hero .btn-play { background: var(--surface); color: var(--ink); box-shadow: 3px 3px 0 var(--accent); }
+
+.app-hero .btn-play:hover { box-shadow: 5px 5px 0 var(--accent); }
 
 .btn-play svg { width: 18px; height: 18px; }
 
@@ -462,7 +262,7 @@ section { padding: 68px 0; }
   margin-bottom: 12px;
 }
 
-.section-sub { color: var(--muted); max-width: 620px; margin: 0 0 46px; }
+.section-sub { color: var(--page-muted); max-width: 620px; margin: 0 0 46px; }
 
 /* ---------- App cards ---------- */
 .apps-grid {
@@ -479,6 +279,7 @@ section { padding: 68px 0; }
   padding: 32px 28px;
   display: flex;
   flex-direction: column;
+  color: var(--ink);
   box-shadow: 6px 6px 0 var(--ink);
   transition: transform 0.18s, box-shadow 0.18s;
 }
@@ -581,6 +382,7 @@ section { padding: 68px 0; }
 
 .value {
   background: var(--surface);
+  color: var(--ink);
   border: 2px solid var(--ink);
   border-radius: var(--radius);
   padding: 24px 22px;
@@ -590,7 +392,7 @@ section { padding: 68px 0; }
 .values-grid .value:nth-child(odd) { transform: rotate(0.5deg); }
 .values-grid .value:nth-child(even) { transform: rotate(-0.5deg); }
 
-.value .v-icon { color: var(--accent); margin-bottom: 14px; }
+.value .v-icon { color: var(--paper-accent); margin-bottom: 14px; }
 
 .value .v-icon svg { width: 24px; height: 24px; display: block; }
 
@@ -607,6 +409,7 @@ section { padding: 68px 0; }
 
 .feature {
   background: var(--surface);
+  color: var(--ink);
   border: 2px solid var(--ink);
   border-radius: var(--radius);
   padding: 26px 24px;
@@ -648,28 +451,29 @@ section { padding: 68px 0; }
 
 .prose h2:first-child { margin-top: 0; }
 
-.prose p { color: var(--muted); margin-bottom: 16px; }
+.prose p { color: var(--page-muted); margin-bottom: 16px; }
 
-.prose ul { color: var(--muted); margin: 0 0 16px 22px; }
+.prose ul { color: var(--page-muted); margin: 0 0 16px 22px; }
 
 .prose ul li { margin-bottom: 8px; }
 
 .prose a { color: var(--accent); text-decoration-thickness: 2px; }
 
-.prose strong { color: var(--ink); }
+.prose strong { color: var(--page-text); }
 
 /* ---------- FAQ ---------- */
 .faq { max-width: 720px; }
 
 .faq details {
   background: var(--surface);
+  color: var(--ink);
   border: 2px solid var(--ink);
   border-radius: 14px;
   margin-bottom: 14px;
   box-shadow: 3px 3px 0 var(--ink);
 }
 
-.faq details[open] { box-shadow: 3px 3px 0 var(--accent); }
+.faq details[open] { box-shadow: 3px 3px 0 var(--paper-accent); }
 
 .faq summary {
   cursor: pointer;
@@ -690,7 +494,7 @@ section { padding: 68px 0; }
   content: "+";
   font-family: var(--font-quirk);
   font-size: 1.4rem;
-  color: var(--accent);
+  color: var(--paper-accent);
   transition: transform 0.2s;
   flex-shrink: 0;
 }
@@ -699,16 +503,17 @@ section { padding: 68px 0; }
 
 .faq .faq-a { padding: 0 20px 18px; color: var(--muted); font-size: 0.93rem; max-width: 640px; }
 
-.faq .faq-a a { color: var(--accent); }
+.faq .faq-a a { color: var(--paper-accent); }
 
 /* ---------- Download band ---------- */
 .download-band {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--ink);
   border-radius: 22px;
   padding: 58px 40px;
   transform: rotate(-0.6deg);
-  box-shadow: 10px 10px 0 var(--tint), 10px 10px 0 2px var(--ink);
+  box-shadow: 10px 10px 0 #ff8a1f;
 }
 
 .download-band > * { transform: rotate(0.6deg); }
@@ -721,12 +526,11 @@ section { padding: 68px 0; }
   letter-spacing: -0.02em;
 }
 
-.download-band p { color: rgba(250, 246, 238, 0.65); margin-bottom: 30px; max-width: 540px; }
+.download-band p { color: var(--muted); margin-bottom: 30px; max-width: 540px; }
 
-.download-band .btn-play { background: var(--bg); color: var(--ink); border-color: var(--bg); box-shadow: 3px 3px 0 var(--accent); }
 
 /* ---------- App detail hero ---------- */
-.app-hero { padding: 76px 0 52px; position: relative; }
+.app-hero { padding-top: 76px; padding-bottom: 52px; position: relative; }
 
 .app-hero .app-icon {
   width: 84px;
@@ -741,11 +545,9 @@ section { padding: 68px 0; }
 .app-hero p.lead {
   max-width: 640px;
   margin: 0 0 36px;
-  color: var(--muted);
+  color: var(--page-muted);
   font-size: clamp(1rem, 2vw, 1.15rem);
 }
-
-.app-hero p.lead strong { color: var(--ink); }
 
 .breadcrumb {
   font-family: var(--font-display);
@@ -753,13 +555,13 @@ section { padding: 68px 0; }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--muted);
+  color: var(--page-muted);
   margin-bottom: 28px;
 }
 
-.breadcrumb a { color: var(--muted); text-decoration: none; }
+.breadcrumb a { color: var(--page-muted); text-decoration: none; }
 
-.breadcrumb a:hover { color: var(--ink); }
+.breadcrumb a:hover { color: var(--page-text); }
 
 /* ---------- Screenshot strip ---------- */
 .shots-section { padding-top: 0; }
@@ -796,7 +598,10 @@ footer {
   padding: 48px 0 40px;
   margin-top: 48px;
   background: var(--surface);
+  color: var(--ink);
 }
+
+footer .brand { color: var(--ink); }
 
 .footer-inner {
   display: flex;
@@ -824,7 +629,7 @@ footer {
   margin-bottom: 9px;
 }
 
-.footer-inner .f-col a:hover { color: var(--accent); }
+.footer-inner .f-col a:hover { color: var(--paper-accent); }
 
 .footer-bottom {
   margin-top: 36px;
@@ -845,6 +650,7 @@ footer {
   border-radius: 16px;
   box-shadow: 5px 5px 0 var(--ink);
   padding: 18px 20px;
+  color: var(--ink);
   z-index: 10000;
   transform: rotate(-0.5deg);
 }
@@ -853,7 +659,7 @@ footer {
 
 .consent p strong { color: var(--ink); }
 
-.consent p a { color: var(--accent); }
+.consent p a { color: var(--paper-accent); }
 
 .consent-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 
@@ -863,185 +669,101 @@ footer {
   .consent { left: 12px; right: 12px; max-width: none; }
 }
 
-/* ---------- Weather note sticker ---------- */
-.wx-note {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 9998;
-  max-width: 270px;
-  background: var(--surface);
-  border: 2px solid var(--ink);
-  border-radius: 14px;
-  box-shadow: 4px 4px 0 var(--ink);
-  padding: 12px 14px;
-  transform: rotate(0.8deg);
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  transition: transform 0.35s ease;
+/* ---------- The street under the hero: a lamp, the termites round it, and the dog ---------- */
+.street { position: absolute; inset: 0; pointer-events: none; }
+
+/* wet pavement running the full width of the screen */
+.street-ground {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  height: 26px;
+  background: #1a1220;
+  border-top: 2px solid #110b16;
 }
 
-/* tucked away: the note slides off the right edge, leaving a little tab peeking out */
-.wx-note.wx-hidden { transform: translateX(calc(100% + 22px)) rotate(0.8deg); }
-
-.wx-note .wx-tab {
+.lamp {
   position: absolute;
-  left: -40px;
-  bottom: 6px;
-  width: 34px;
-  height: 34px;
-  border: 2px solid var(--ink);
-  border-radius: 10px;
+  right: 0;
+  bottom: 0;
+  width: 282px;
+  height: 520px;
+}
+
+.lamp svg, .lamp canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.lamp svg { overflow: visible; }
+
+/* ---------- Rain sounds toggle ---------- */
+.sound-btn {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
   background: var(--surface);
   color: var(--ink);
-  box-shadow: 2px 2px 0 var(--ink);
-  cursor: pointer;
-  padding: 0;
-  display: none;
-  place-items: center;
-}
-
-.wx-note.wx-hidden .wx-tab { display: grid; }
-
-.wx-note .wx-tab svg { width: 17px; height: 17px; display: block; }
-
-.wx-note p { font-size: 0.84rem; color: var(--muted); line-height: 1.5; }
-
-.wx-note p strong { color: var(--accent); }
-
-.wx-note .wx-sub {
-  display: block;
-  font-family: var(--font-quirk);
-  font-style: italic;
-  font-size: 0.78rem;
-  margin-top: 4px;
-}
-
-.wx-note .wx-fix { color: var(--accent); }
-
-/* weather and time-of-day button rows inside the note */
-.wx-note .wx-skyrow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 9px;
-  align-items: center;
-}
-
-.wx-note .wx-rowlab {
-  width: 100%;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 #ff8a1f;
   font-family: var(--font-display);
-  font-style: normal;
-  font-size: 0.58rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--muted);
-  margin-bottom: -2px;
-}
-
-.wx-note .wx-skybtn {
-  width: 27px;
-  height: 27px;
-  display: grid;
-  place-items: center;
-  border: 2px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--muted);
+  font-size: 0.82rem;
   cursor: pointer;
-  padding: 0;
+  transform: rotate(1.5deg);
+  transition: transform 0.15s;
 }
 
-.wx-note .wx-skybtn svg { width: 15px; height: 15px; display: block; }
+.sound-btn:hover { transform: rotate(0deg) translate(-1px, -1px); }
 
-.wx-note .wx-skybtn:hover { border-color: var(--ink); color: var(--ink); }
+.sound-btn svg { width: 17px; height: 17px; display: block; }
 
-.wx-note .wx-skybtn.on {
-  border-color: var(--accent);
+.sound-btn[aria-pressed="true"] { box-shadow: 3px 3px 0 var(--paper-accent); }
+
+.psst {
+  position: fixed;
+  right: 196px;
+  bottom: 24px;
+  z-index: 9000;
+  font-family: "Caveat", var(--font-quirk), cursive;
+  font-weight: 600;
+  font-size: 1.45rem;
   color: var(--accent);
-  box-shadow: 2px 2px 0 var(--accent);
+  transform: rotate(-4deg);
+  pointer-events: none;
+  transition: opacity 0.6s;
 }
 
-.wx-note .wx-skylive {
-  width: auto;
-  padding: 0 8px;
-  font-family: var(--font-display);
-  font-size: 0.64rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
+.psst.gone { opacity: 0; }
+
+/* while the cookie question is open, the hint steps aside so the two don't crowd each other */
+body.consent-open .psst { display: none; }
+
+@media (max-width: 1000px) {
+  .hero { padding-bottom: 270px; }
+  .lamp { width: 136px; height: 250px; right: 4px; }
+  .street-ground { height: 12px; }
 }
 
-.wx-note .wx-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.15rem;
-  line-height: 1;
-  color: var(--muted);
-  padding: 0;
-  font-family: var(--font);
+@media (max-width: 640px) {
+  .psst { right: 20px; bottom: 66px; font-size: 1.25rem; }
 }
 
-.wx-note .wx-close:hover { color: var(--ink); }
-
+/* on phones the cookie banner spans the bottom, so the rain button sits just above it */
 @media (max-width: 480px) {
-  .wx-note { right: 12px; left: auto; bottom: 78px; max-width: 240px; }
+  body.consent-open .sound-btn { bottom: 214px; }
 }
-
-/* ---------- Time-of-day skies (set by site.js from the visitor's clock) ---------- */
-/* morning: bright golden sunshine, clearly different from the peachy evening */
-body.sky-morning {
-  --bg: #fcf4dd;
-  --surface: #fffcf2;
-  --line: #eaddba;
-}
-
-/* evening: dusky amber */
-body.sky-evening {
-  --bg: #f8ece3;
-  --surface: #fff7ef;
-  --line: #e9dac9;
-}
-
-/* night: lights off, moon on */
-body.sky-night {
-  --bg: #15141d;
-  --surface: #1e1d29;
-  --ink: #f2efe6;
-  --muted: #a29d90;
-  --line: #343241;
-  --accent: #a5b4fc;
-  --tint: #2b2a3e;
-  --pb-accent: #f2a952;
-  --pb-tint: #2f2317;
-  --ds-accent: #6fd7ec;
-  --ds-tint: #132e37;
-  --sa-accent: #c7a9f9;
-  --sa-tint: #281d3b;
-}
-
-/* keep the per-app accent on app pages at night (body.sky-night outranks .theme-*) */
-body.sky-night.theme-pettibox { --accent: var(--pb-accent); --tint: var(--pb-tint); }
-body.sky-night.theme-directserve { --accent: var(--ds-accent); --tint: var(--ds-tint); }
-body.sky-night.theme-speakalert { --accent: var(--sa-accent); --tint: var(--sa-tint); }
-
-/* the night accent is pastel, so dark text reads better on primary buttons */
-body.sky-night .btn-primary { color: #15141d; }
-
-/* the download band inverts at night (light card on dark page) — its copy must flip too */
-body.sky-night .download-band p { color: rgba(21, 20, 29, 0.68); }
-
-/* no sunglasses under a clear night sky */
-body.sky-night .cursor-runner .shades { display: none; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
   .nav-links { gap: 14px; }
   .nav-links a.hide-sm { display: none; }
-  .hero { padding: 56px 0 44px; }
+  .hero { padding-top: 56px; }
   section { padding: 50px 0; }
   .download-band { padding: 44px 26px; }
   .app-card, .app-card:nth-child(n) { transform: none; }
