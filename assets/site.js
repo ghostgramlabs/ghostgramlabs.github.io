@@ -78,63 +78,36 @@
     level = PHASES[phase].level;
   }
 
-  /* ---------- sound: rain, crickets once it quietens, thunder with the storm.
-     Off until the visitor asks for it, and made in the browser so there is nothing to download. ---------- */
+  /* ---------- sound: real rain, wind with the storm, thunder after each strike.
+     Public-domain recordings from Wikimedia Commons ("Rain", "Rain against the window", "Tonitrus"),
+     fetched only once the visitor turns sound on. ---------- */
   var sound = (function () {
     var KEY = 'gg-sound';
-    var ac = null, master, rainG, heavyG, lightDropsG, heavyDropsG, cricketG, brown, on = false, chirpTimer = 0;
+    var ac = null, master, rainG, windG, buffers = null, loading = false, on = false;
 
-    function noise(kind) {
-      var len = ac.sampleRate * 3, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0), prev = 0;
-      var b0 = 0, b1 = 0, b2 = 0;
-      for (var i = 0; i < len; i++) {
-        var w = Math.random() * 2 - 1;
-        if (kind === 'brown') { prev = (prev + 0.02 * w) / 1.02; d[i] = prev * 3.5; }
-        else { b0 = 0.997 * b0 + w * 0.029; b1 = 0.985 * b1 + w * 0.032; b2 = 0.95 * b2 + w * 0.048; d[i] = (b0 + b1 + b2 + w * 0.02) * 2.2; } /* pink: softer than white */
-      }
-      return buf;
+    function fetchBuffer(name) {
+      return fetch('/assets/audio/' + name).then(function (r) { return r.arrayBuffer(); }).then(function (b) {
+        return new Promise(function (ok, fail) { ac.decodeAudioData(b, ok, fail); });
+      });
     }
 
-    /* real rain is thousands of separate drops: each one a tiny ringing tick, the odd big one a low plop.
-       Two loops of different lengths drift against each other so the pattern never audibly repeats. */
-    function dropsBuffer(perSec, seconds) {
-      var sr = ac.sampleRate, len = Math.floor(sr * seconds), buf = ac.createBuffer(2, len, sr);
-      for (var ch = 0; ch < 2; ch++) {
-        var d = buf.getChannelData(ch), n = Math.floor(perSec * seconds / 2);
-        for (var k = 0; k < n; k++) {
-          var big = Math.random() < 0.08;
-          var f = big ? 380 + Math.random() * 520 : 1700 + Math.random() * 4600;
-          var dur = big ? 0.025 + Math.random() * 0.03 : 0.003 + Math.random() * 0.012;
-          var amp = (big ? 0.35 : 0.12) + Math.pow(Math.random(), 2) * (big ? 0.35 : 0.45);
-          var start = Math.floor(Math.random() * len), m = Math.floor(dur * sr * 4);
-          for (var j = 0; j < m; j++) {
-            var x = (start + j) % len;
-            d[x] += amp * Math.exp(-j / (dur * sr)) * Math.sin(6.2832 * f * j / sr);
-          }
-        }
-      }
-      return buf;
-    }
-
-    function play(buf, out) {
+    /* loop a recording; the ends are trimmed a touch to skip the silence mp3 encoders pad on */
+    function loop(buf, out, rate, offset, pan) {
       var src = ac.createBufferSource();
       src.buffer = buf;
       src.loop = true;
-      src.connect(out);
-      src.start();
-    }
-
-    function loop(buf, type, freq, q, out) {
-      var src = ac.createBufferSource();
-      src.buffer = buf;
-      src.loop = true;
-      var f = ac.createBiquadFilter();
-      f.type = type;
-      f.frequency.value = freq;
-      f.Q.value = q;
-      src.connect(f);
-      f.connect(out);
-      src.start();
+      src.loopStart = 0.06;
+      src.loopEnd = buf.duration - 0.06;
+      src.playbackRate.value = rate;
+      var node = src;
+      if (ac.createStereoPanner) {
+        var p = ac.createStereoPanner();
+        p.pan.value = pan;
+        src.connect(p);
+        node = p;
+      }
+      node.connect(out);
+      src.start(0, offset % (buf.duration - 0.2));
     }
 
     function build() {
@@ -142,101 +115,63 @@
       master = ac.createGain();
       master.gain.value = 0;
       var limiter = ac.createDynamicsCompressor(); /* keeps the loudest thunder from distorting */
-      limiter.threshold.value = -12;
+      limiter.threshold.value = -10;
       limiter.ratio.value = 6;
       master.connect(limiter);
       limiter.connect(ac.destination);
       rainG = ac.createGain(); rainG.gain.value = 0; rainG.connect(master);
-      heavyG = ac.createGain(); heavyG.gain.value = 0; heavyG.connect(master);
-      lightDropsG = ac.createGain(); lightDropsG.gain.value = 0; lightDropsG.connect(master);
-      heavyDropsG = ac.createGain(); heavyDropsG.gain.value = 0; heavyDropsG.connect(master);
-      cricketG = ac.createGain(); cricketG.gain.value = 0; cricketG.connect(master);
-      brown = noise('brown');
-      loop(noise('pink'), 'lowpass', 2400, 0.3, rainG); /* the soft wash of rain far off */
-      loop(brown, 'lowpass', 600, 0.7, heavyG); /* the weight of a downpour */
-      play(dropsBuffer(40, 5), lightDropsG); /* drops close by: on leaves, the roof, the road */
-      play(dropsBuffer(220, 7), heavyDropsG);
-      chirps();
+      windG = ac.createGain(); windG.gain.value = 0; windG.connect(master);
     }
 
-    /* cheeveedu: two crickets a little apart, each a quick triple chirp */
-    function cricket(pitch, pan) {
-      var t = ac.currentTime + 0.02;
-      var o = ac.createOscillator(), g = ac.createGain();
-      var p = ac.createStereoPanner ? ac.createStereoPanner() : null;
-      o.type = 'sine';
-      o.frequency.value = pitch;
-      g.gain.value = 0;
-      for (var i = 0; i < 3; i++) {
-        g.gain.setValueAtTime(0, t + i * 0.055);
-        g.gain.linearRampToValueAtTime(0.5, t + i * 0.055 + 0.008);
-        g.gain.linearRampToValueAtTime(0, t + i * 0.055 + 0.032);
-      }
-      o.connect(g);
-      if (p) { p.pan.value = pan; g.connect(p); p.connect(cricketG); }
-      else g.connect(cricketG);
-      o.start(t);
-      o.stop(t + 0.2);
+    function load() {
+      if (buffers || loading) return;
+      loading = true;
+      label('rain sounds: loading…');
+      Promise.all([fetchBuffer('rain.mp3'), fetchBuffer('rain-wind.mp3'), fetchBuffer('thunder.mp3')]).then(function (b) {
+        buffers = { rain: b[0], wind: b[1], thunder: b[2] };
+        /* two copies of the rain, a little apart in time, speed and space, so the loop never audibly repeats */
+        loop(buffers.rain, rainG, 1, 0, -0.35);
+        loop(buffers.rain, rainG, 0.93, 4.1, 0.35);
+        loop(buffers.wind, windG, 1, Math.random() * 30, 0);
+        lastFollow = 0;
+        follow(level);
+        paint();
+      }).catch(function () {
+        loading = false;
+        label('rain sounds: unavailable');
+      });
     }
 
-    function chirps() {
-      clearTimeout(chirpTimer);
-      if (on && cricketG.gain.value > 0.005) {
-        cricket(4400 + Math.random() * 120, -0.5);
-        if (Math.random() < 0.7) {
-          setTimeout(function () { if (on) cricket(4950 + Math.random() * 100, 0.55); }, 180 + Math.random() * 260);
-        }
-      }
-      chirpTimer = setTimeout(chirps, 520 + Math.random() * 480);
-    }
-
-    function thunder(strength) {
-      if (!on || !ac) return;
-      var t = ac.currentTime;
+    /* each strike plays a different stretch of the thunder recording; far ones are muffled and soft */
+    function thunder(strength, far) {
+      if (!on || !buffers) return;
+      var t = ac.currentTime, len = 6 + Math.random() * 3;
       var src = ac.createBufferSource();
-      src.buffer = brown;
+      src.buffer = buffers.thunder;
       var f = ac.createBiquadFilter();
       f.type = 'lowpass';
-      f.frequency.setValueAtTime(320, t);
-      f.frequency.exponentialRampToValueAtTime(90, t + 4);
+      f.frequency.value = far ? 420 : 4000;
       var g = ac.createGain();
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(1.6 * strength, t + 0.25);
-      g.gain.exponentialRampToValueAtTime(0.7 * strength, t + 1.2);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 5);
+      g.gain.exponentialRampToValueAtTime(strength * (far ? 0.5 : 1), t + 0.08);
+      g.gain.setValueAtTime(strength * (far ? 0.5 : 1), t + len - 2);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + len);
       src.connect(f);
       f.connect(g);
       g.connect(master);
-      src.start(t, Math.random() * 1.5);
-      src.stop(t + 5.2);
-      if (strength > 0.75) { /* a near one cracks before it rolls */
-        var cr = ac.createBufferSource(), hp = ac.createBiquadFilter(), cg = ac.createGain();
-        cr.buffer = brown;
-        hp.type = 'highpass';
-        hp.frequency.value = 900;
-        cg.gain.setValueAtTime(0.0001, t);
-        cg.gain.exponentialRampToValueAtTime(2.2 * strength, t + 0.02);
-        cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
-        cr.connect(hp);
-        hp.connect(cg);
-        cg.connect(master);
-        cr.start(t, Math.random());
-        cr.stop(t + 0.6);
-      }
+      src.start(t, Math.random() * (buffers.thunder.duration - len - 0.5));
+      src.stop(t + len + 0.1);
     }
 
     var lastFollow = 0;
 
     function follow(lv) {
-      if (!on || !ac) return;
+      if (!on || !buffers) return;
       var t = ac.currentTime;
       if (t - lastFollow < 0.25) return; /* a few updates a second is plenty for weather */
       lastFollow = t;
-      rainG.gain.setTargetAtTime(0.06 + lv * 0.5, t, 1.2); /* a light patter in the drizzle, a roar in the storm */
-      lightDropsG.gain.setTargetAtTime(0.45 + lv * 0.25, t, 1.2);
-      heavyDropsG.gain.setTargetAtTime(lv * 0.5, t, 1.2);
-      heavyG.gain.setTargetAtTime(lv * lv * 0.55, t, 1.2);
-      cricketG.gain.setTargetAtTime(Math.max(0, 0.6 - lv) * 1.1, t, 2); /* they sing once it quietens */
+      rainG.gain.setTargetAtTime(0.45 + lv * 0.55, t, 1.5); /* soft in the drizzle, full in the storm */
+      windG.gain.setTargetAtTime(Math.max(0, lv - 0.45) * 1.6, t, 2); /* the wind only rises with the storm */
     }
 
     var btn = document.createElement('button');
@@ -247,6 +182,11 @@
     var ICON_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
     var ICON_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
 
+    function label(text) {
+      var s = btn.querySelector('span');
+      if (s) s.textContent = text;
+    }
+
     function paint() {
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       btn.innerHTML = (on ? ICON_ON : ICON_OFF) + '<span>rain sounds: ' + (on ? 'on' : 'off') + '</span>';
@@ -255,22 +195,21 @@
     function setOn(v) {
       on = v;
       try { localStorage.setItem(KEY, v ? 'on' : 'off'); } catch (e) {}
+      paint();
       if (v) {
         if (!ac) build();
         if (ac.state === 'suspended') ac.resume();
+        load();
         lastFollow = 0;
         follow(level);
         master.gain.setTargetAtTime(1, ac.currentTime, 0.5);
         /* if the browser is still holding sound back, say so on the button instead of failing quietly */
         setTimeout(function () {
-          if (on && ac.state !== 'running') {
-            btn.querySelector('span').textContent = 'sound blocked: tap again';
-          }
+          if (on && ac.state !== 'running') label('sound blocked: tap again');
         }, 700);
       } else if (ac) {
         master.gain.setTargetAtTime(0, ac.currentTime, 0.3);
       }
-      paint();
     }
 
     /* a scribbled hint, only until the visitor has tried the button once */
@@ -615,7 +554,7 @@
     flashScale = far ? 0.45 : 1;
     var delay = far ? 2500 + Math.random() * 2000 : 700 + Math.random() * 1500;
     if (!far) flinchAt = t + delay;
-    setTimeout(function () { sound.thunder(far ? 0.35 : 0.65 + Math.random() * 0.35); }, delay);
+    setTimeout(function () { sound.thunder(far ? 0.5 : 0.7 + Math.random() * 0.3, far); }, delay);
   }
 
   function startPhase(t) {
