@@ -439,7 +439,8 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
   gap: 16px 26px;
 }
 
-.uses a {
+.uses a,
+.uses .use {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -454,8 +455,8 @@ section.container { padding-top: 64px; padding-bottom: 64px; }
   transition: transform 0.13s, box-shadow 0.13s;
 }
 
-.uses li:nth-child(odd) a { transform: rotate(-0.5deg); }
-.uses li:nth-child(even) a { transform: rotate(0.4deg); }
+.uses li:nth-child(odd) > * { transform: rotate(-0.5deg); }
+.uses li:nth-child(even) > * { transform: rotate(0.4deg); }
 .uses a:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #0d0911; }
 
 .uses .use-q { font-size: 0.98rem; line-height: 1.4; }
