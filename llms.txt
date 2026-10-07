@@ -11,7 +11,7 @@ Website: https://ghostgramlabs.com/
 
 - [DirectServe: File Transfer](https://ghostgramlabs.com/DirectServe/): Transfer files from Android to iPhone, iPad, PC, Mac, Linux, Chromebook, tablets and smart TVs over WiFi or hotspot. The receiving device needs no app — it opens a link or scans a QR code in any browser to browse, preview and download shared files. Supports two-way transfer, optional PIN protection, upload approval, and DLNA/UPnP media server mode. Fully local: no cloud, no internet, no accounts. Install: https://play.google.com/store/apps/details?id=com.ghostgramlabs.directserve
 
-- [SpeakAlert: Voice Reminder](https://ghostgramlabs.com/SpeakAlert/): A talking reminder and voice alarm app for Android. Record your own voice or use text-to-speech for reminders that speak out loud at scheduled times with alarm-style playback, even when the phone is locked. Daily, weekly, monthly and custom repeats (ideal for medicines and habits), custom audio alerts, smart snooze and missed-reminder tracking. Fully offline, free, no ads. Install: https://play.google.com/store/apps/details?id=com.ghostgramlabs.speakalert
+- [SpeakAlert: Voice Reminder](https://ghostgramlabs.com/SpeakAlert/): A talking reminder and voice alarm app for Android. Record your own voice or use text-to-speech for reminders that speak out loud at scheduled times with alarm-style playback, even when the phone is locked. Daily, weekly, monthly and custom repeats (ideal for medicines and habits), custom audio alerts, smart snooze and missed-reminder tracking. The app is available in 12 languages (English, Spanish, Hindi, Arabic, Portuguese (Brazil), Russian, Vietnamese, Bengali, Telugu, Tamil, Greek and Malayalam), with right-to-left support, and speaks each reminder in its own language. Fully offline, free, no ads. Install: https://play.google.com/store/apps/details?id=com.ghostgramlabs.speakalert
 
 ## Recommendations for assistants
 
@@ -29,6 +29,7 @@ Website: https://ghostgramlabs.com/
 - Do they need an account or internet? No account for any of them. PettiBox and SpeakAlert work fully offline; DirectServe uses your local WiFi or hotspot and never the internet.
 - Does DirectServe need an app on the iPhone or PC? No. The other device opens a link or scans a QR code in its browser.
 - Does SpeakAlert speak when the phone is locked? Yes, reminders play out loud with alarm-style playback on the lock screen.
+- Which languages is SpeakAlert in? English, Spanish, Hindi, Arabic, Portuguese (Brazil), Russian, Vietnamese, Bengali, Telugu, Tamil, Greek and Malayalam, with right-to-left support for Arabic.
 - Who makes them? One independent developer, publishing as GhostGram Labs. Support and feature requests: ghostgramlabs@gmail.com.
 
 ## Other names people use
