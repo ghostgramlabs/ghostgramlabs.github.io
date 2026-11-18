@@ -14,8 +14,8 @@
   --tint: #e9e7fb;
   --pb-accent: #b45309;
   --pb-tint: #fbeeda;
-  --ds-accent: #0e7490;
-  --ds-tint: #ddf1f6;
+  --ds-accent: #0b4f7c;
+  --ds-tint: #def4fe;
   --sa-accent: #6d28d9;
   --sa-tint: #efe6fc;
   --radius: 16px;
@@ -26,7 +26,7 @@
 
 /* app pages: a lighter take of the app colour on the night, the true colour on paper */
 .theme-pettibox { --accent: #f2a952; --paper-accent: var(--pb-accent); --tint: var(--pb-tint); }
-.theme-directserve { --accent: #6fd7ec; --paper-accent: var(--ds-accent); --tint: var(--ds-tint); }
+.theme-directserve { --accent: #7fd4fc; --paper-accent: var(--ds-accent); --tint: var(--ds-tint); }
 .theme-speakalert { --accent: #c7a9f9; --paper-accent: var(--sa-accent); --tint: var(--sa-tint); }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }

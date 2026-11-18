@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://ghostgramlabs.com/PettiBox/privacy.html</loc>
-    <lastmod>2026-07-10</lastmod>
+    <lastmod>2026-11-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -39,6 +39,18 @@
   <url>
     <loc>https://ghostgramlabs.com/privacy.html</loc>
     <lastmod>2026-10-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://ghostgramlabs.com/directserve-privacy/</loc>
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://ghostgramlabs.com/SpeakAlert/privacy.html</loc>
+    <lastmod>2026-10-24</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
