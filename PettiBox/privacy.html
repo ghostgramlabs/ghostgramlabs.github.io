@@ -11,7 +11,7 @@
 
 <h1>Privacy Policy for PettiBox</h1>
 
-<p><strong>Effective Date:</strong> November 17, 2026</p>
+<p><strong>Effective Date:</strong> November 22, 2026</p>
 
 <p>
 PettiBox is made by an independent developer who publishes apps under the
@@ -34,7 +34,8 @@ is optional and is used only for Google Drive backup, restore, and sync.
 
 <p>
 PettiBox does not run any server that stores your saved content. There are
-no PettiBox servers, no analytics, and no ads in the app.
+no PettiBox servers, no ads, and no analytics or tracking by the developer
+(Google ML Kit's own technical diagnostics are described in section 3).
 </p>
 
 
@@ -64,7 +65,17 @@ share, back up, or sync it.
 <p>
 PettiBox reads text in your saved images, screenshots, and PDFs on your
 device, using Google ML Kit and Tesseract, so you can search for it.
-Your images and PDFs are not sent anywhere for this.
+Your images, PDFs and the text in them are not sent anywhere for this.
+</p>
+
+<p>
+Google ML Kit, which is part of Google Play services, sends Google limited
+technical information so it can work and be improved: your device model,
+Android version, the app's name and version, how fast text recognition ran,
+error codes, and (for some languages) a random per-install identifier that is
+not meant to identify you. Google encrypts it in transit and does not share it
+with third parties. It never includes your images, PDFs or text. See
+<a href="https://developers.google.com/ml-kit/android-data-disclosure">Google's ML Kit data disclosure</a>.
 </p>
 
 <p>
@@ -206,7 +217,21 @@ including the Limited Use requirements.
 </p>
 
 
-<h2>10. Importing Bookmarks</h2>
+<h2>10. PettiBox for Chrome</h2>
+
+<p>
+The optional PettiBox extension for Google Chrome saves the page you are on
+when you click it, and lets you search and edit your saves. It reads only the
+tab you choose to save (its address, title and icon). It signs in with your
+Google account through Chrome and syncs with your PettiBox apps through the
+same <em>My Drive / PettiBox / Sync</em> folder, using the limited
+<em>drive.file</em> permission. Your library is kept in Chrome's storage on
+your computer and in your own Google Drive. Nothing is sent to the developer.
+Removing the extension deletes its copy from Chrome.
+</p>
+
+
+<h2>11. Importing Bookmarks</h2>
 
 <p>
 When you import a bookmark file (for example from Chrome, Firefox, Edge,
@@ -215,7 +240,7 @@ device. The file is not uploaded anywhere.
 </p>
 
 
-<h2>11. Sharing and Exporting</h2>
+<h2>12. Sharing and Exporting</h2>
 
 <p>
 When you choose to share or export content, it is sent only to the app or
@@ -223,7 +248,7 @@ service you select.
 </p>
 
 
-<h2>12. Archive and Deletion</h2>
+<h2>13. Archive and Deletion</h2>
 
 <p>
 Archived items stay on your device until you restore or delete them. Deleted
@@ -234,15 +259,18 @@ and files no longer used by any save are cleaned out of the PettiBox sync folder
 </p>
 
 
-<h2>13. Data Collection</h2>
+<h2>14. Data Collection</h2>
 
 <p>
 PettiBox does not collect your saved content, usage data, or personal
 information on any server, and does not sell personal information.
+The developer never receives your saves, your Google account details or your
+Drive files. The only data that leaves your device without you asking is the
+technical ML Kit information described in section 3, which goes to Google.
 </p>
 
 
-<h2>14. Third-Party Services</h2>
+<h2>15. Third-Party Services</h2>
 
 <p>
 PettiBox uses third-party libraries for app features, including file handling,
@@ -251,8 +279,16 @@ and Tesseract), and Google Sign-In and Google Drive for the optional backup
 and sync. These are used only to provide those features.
 </p>
 
+<p>
+Installs, updates and the optional in-app rating prompt are handled by Google
+Play. Google may give the developer anonymous, aggregated statistics and crash
+reports under the
+<a href="https://policies.google.com/privacy">Google Privacy Policy</a>; these
+do not contain your saves.
+</p>
 
-<h2>15. Data Retention</h2>
+
+<h2>16. Data Retention</h2>
 
 <p>
 Your saved content stays on your device until you delete it or uninstall
@@ -261,7 +297,22 @@ them.
 </p>
 
 
-<h2>16. Children's Privacy</h2>
+<h2>17. Your Rights</h2>
+
+<p>
+Depending on where you live, laws such as the EU and UK GDPR, the California
+Consumer Privacy Act (CCPA/CPRA), Brazil's LGPD and India's Digital Personal
+Data Protection Act give you rights to access, correct, delete or move your
+personal data and to object to its use. Your PettiBox library is on your own
+devices and in your own Google Drive, so you can see, export (Backup or CSV
+export), change or delete all of it yourself at any time. The developer holds
+no copy, does not sell or share personal information, and makes no automated
+decisions about you. For questions or complaints, email the address below; you
+can also contact your local data protection authority.
+</p>
+
+
+<h2>18. Children's Privacy</h2>
 
 <p>
 PettiBox is not intended for children under 13 and does not knowingly
@@ -269,7 +320,7 @@ collect personal information from children under 13.
 </p>
 
 
-<h2>17. Security</h2>
+<h2>19. Security</h2>
 
 <p>
 Your saved content stays on your device unless you choose backup, sync,
@@ -278,7 +329,7 @@ your Google account. Keep backups only in places you trust.
 </p>
 
 
-<h2>18. Open Source</h2>
+<h2>20. Open Source</h2>
 
 <p>
 PettiBox is open source under the Apache 2.0 licence. You can read the code at
@@ -286,7 +337,7 @@ PettiBox is open source under the Apache 2.0 licence. You can read the code at
 </p>
 
 
-<h2>19. Changes to This Privacy Policy</h2>
+<h2>21. Changes to This Privacy Policy</h2>
 
 <p>
 This Privacy Policy may be updated when the app changes. Updates are posted
@@ -294,10 +345,14 @@ on this page with a new effective date.
 </p>
 
 
-<h2>20. Contact</h2>
+<h2>22. Contact</h2>
 
 <p>
 For questions about this Privacy Policy or PettiBox:
+</p>
+
+<p>
+See also the <a href="terms.html">Terms of Service</a>.
 </p>
 
 <p>
