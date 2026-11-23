@@ -21,7 +21,8 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from l10n_strings import NAMES, S  # noqa: E402
+from l10n_strings import NAMES, S, SHARE  # noqa: E402
+from urllib.parse import quote  # noqa: E402
 
 SITE = pathlib.Path(__file__).resolve().parents[1]
 BASE = SITE.parent
@@ -125,6 +126,46 @@ def alternates(app, pages):
              f'<link rel="alternate" hreflang="x-default" href="{root}">']
     links += [f'<link rel="alternate" hreflang="{h}" href="{root}{s}/">' for s, h in pages]
     return "\n".join(links)
+
+
+def share(app, cfg, slug, short, page):
+    """Share buttons. Messaging apps get the Play link (one tap to install), X and Facebook get the web page.
+    Every link carries utm labels, so Play Console and Analytics can count shares by channel, never by person."""
+    head, text, share_l, copy_l, done_l = SHARE[slug]
+
+    def play(medium):
+        ref = quote(f"utm_source=ghostgramlabs.com&utm_medium={medium}&utm_campaign=share", safe="")
+        return f"https://play.google.com/store/apps/details?id={cfg['package']}&referrer={ref}"
+
+    def web(medium):
+        return f"{page}?utm_source=share&utm_medium={medium}&utm_campaign=share"
+
+    def q(v):
+        return quote(v, safe="")
+
+    def msg(link):
+        return f"{short}\n{link}"
+
+    links = [
+        ("WhatsApp", f"https://wa.me/?text={q(msg(play('whatsapp')))}"),
+        ("Telegram", f"https://t.me/share/url?url={q(play('telegram'))}&text={q(short)}"),
+        ("X", f"https://x.com/intent/post?text={q(short)}&url={q(web('x'))}"),
+        ("Facebook", f"https://www.facebook.com/sharer/sharer.php?u={q(web('facebook'))}"),
+    ]
+    btns = "\n      ".join(f'<a class="btn btn-ghost" href="{esc(u)}" rel="noopener" target="_blank">{n}</a>'
+                           for n, u in links)
+    return f"""<section class="container share-band" aria-label="{esc(share_l)}" data-msg="{esc(msg(play('copy')))}">
+    <h2 class="section-title">{esc(head.format(app=app))}</h2>
+    <p class="section-sub">{esc(text.format(app=app))}</p>
+    <div class="cta-row">
+      <button class="btn btn-ghost" type="button" data-share hidden>{esc(share_l)}</button>
+      {btns}
+      <button class="btn btn-ghost" type="button" data-copy data-done="{esc(done_l)}">{esc(copy_l)}</button>
+    </div>
+    <script>(function(){{var s=document.currentScript.closest('section'),m=s.getAttribute('data-msg'),n=s.querySelector('[data-share]'),c=s.querySelector('[data-copy]');
+    if(navigator.share){{n.hidden=false;n.onclick=function(){{navigator.share({{text:m}}).catch(function(){{}});}};}}
+    c.onclick=function(){{navigator.clipboard.writeText(m).then(function(){{c.textContent=c.getAttribute('data-done');}});}};}})();</script>
+  </section>"""
 
 
 def switcher(app, pages, current, label):
@@ -232,6 +273,8 @@ PAGE = """<!DOCTYPE html>
     </div>
   </section>
 
+  {share}
+
   {switcher}
 </main>
 
@@ -285,11 +328,12 @@ def mark(text, name, content, before):
     return text.replace(before, block + "\n" + before)
 
 
-def english(path, alt, sw):
+def english(path, alt, sw, sh):
     """Link the English page to its translations: hreflang in the head, the language list at the end."""
     t = path.read_text(encoding="utf-8")
     t = mark(t, "alternates", alt, "</head>")
     t = mark(t, "switcher", "  " + sw, "</main>")
+    t = mark(t, "share", "  " + sh, "<!-- l10n:switcher -->")
     path.write_text(t, encoding="utf-8", newline="\n")
 
 
@@ -331,7 +375,7 @@ def build():
                 play=f"https://play.google.com/store/apps/details?id={cfg['package']}&amp;hl={play.replace('-', '_')}",
                 svg=PLAY_SVG,
                 playlabel=esc(t["play"]), shots=shot_html, body=body_html(full), statement=esc(t["statement"]),
-                switcher=switcher(app, pairs, slug, t["other"]), privacy=cfg["privacy"], terms=cfg["terms"],
+                switcher=switcher(app, pairs, slug, t["other"]), share=share(app, cfg, slug, short, url), privacy=cfg["privacy"], terms=cfg["terms"],
                 privacylabel=esc(t["privacy"]), termslabel=esc(t["terms"]), code=cfg["code"],
                 jsonld=jsonld(app, cfg, title, short, url, hl, t["statement"]))
             out = cfg["out"] / slug / "index.html"
@@ -339,7 +383,9 @@ def build():
             out.write_text(page, encoding="utf-8", newline="\n")
             sitemap.append(url)
         print(f"{app}: {len(pages)} pages")
-        english(cfg["out"] / "index.html", alternates(app, pairs), switcher(app, pairs, "", S["en"]["other"]))
+        en_short = (listing / "en-US" / "short_description.txt").read_text(encoding="utf-8").strip()
+        english(cfg["out"] / "index.html", alternates(app, pairs), switcher(app, pairs, "", S["en"]["other"]),
+                share(app, cfg, "en", en_short, f"https://ghostgramlabs.com/{app}/"))
     urls = "\n".join(f"  <url><loc>{u}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>"
                      for u in sitemap)
     (SITE / "sitemap-l10n.xml").write_text(

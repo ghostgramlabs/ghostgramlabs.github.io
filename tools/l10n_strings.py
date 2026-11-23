@@ -91,3 +91,34 @@ S = {
                terms="ข้อกำหนดการใช้งาน", home="หน้าแรก", shots="ภาพหน้าจอ",
                statement="GhostGram Labs ไม่ใช่บริษัท แต่เป็นโปรเจกต์ส่วนตัวที่ให้ใช้ฟรีของนักพัฒนาอิสระคนหนึ่ง แอปเหล่านี้ไม่มีโฆษณา ไม่มีการซื้อในแอป ไม่มีการสมัครสมาชิก และไม่มีรายได้ใดๆ"),
 }
+
+# The share section: heading, text (both take {app}), native share button, copy button, copy confirmation.
+# The shared message itself is the app's translated Play short description plus a link.
+SHARE = {
+    "en": ("Help {app} reach more people", "{app} is free and earns nothing, so it only grows when people share it. If it helped you, send it to someone who might find it useful.", "Share", "Copy message", "Copied"),
+    "es": ("Ayuda a que {app} llegue a más personas", "{app} es gratis y no genera ingresos, así que solo crece cuando la gente la comparte. Si te sirvió, envíala a alguien a quien le pueda ser útil.", "Compartir", "Copiar mensaje", "Copiado"),
+    "pt-br": ("Ajude o {app} a chegar a mais pessoas", "O {app} é gratuito e não gera receita, então só cresce quando as pessoas compartilham. Se ele te ajudou, envie para alguém que possa achar útil.", "Compartilhar", "Copiar mensagem", "Copiado"),
+    "pt-pt": ("Ajude a {app} a chegar a mais pessoas", "A {app} é gratuita e não gera receita, por isso só cresce quando as pessoas a partilham. Se o ajudou, envie-a a alguém a quem possa ser útil.", "Partilhar", "Copiar mensagem", "Copiado"),
+    "zh-hans": ("帮助 {app} 让更多人知道", "{app} 免费且不产生任何收入，只有靠大家分享才能被更多人看到。如果它帮到了你，请把它分享给可能用得上的人。", "分享", "复制消息", "已复制"),
+    "zh-hant": ("幫助 {app} 讓更多人知道", "{app} 免費且不產生任何收入，只有靠大家分享才能被更多人看到。如果它幫到了你，請把它分享給可能用得上的人。", "分享", "複製訊息", "已複製"),
+    "hi": ("{app} को और लोगों तक पहुँचाने में मदद करें", "{app} मुफ़्त है और इससे कोई कमाई नहीं होती, इसलिए यह तभी आगे बढ़ता है जब लोग इसे शेयर करते हैं। अगर इससे आपको मदद मिली, तो इसे किसी ऐसे व्यक्ति को भेजें जिसके काम आ सकता है।", "शेयर करें", "मैसेज कॉपी करें", "कॉपी हो गया"),
+    "de": ("Hilf mit, dass {app} mehr Menschen erreicht", "{app} ist kostenlos und bringt keine Einnahmen, deshalb wächst die App nur, wenn Menschen sie weiterempfehlen. Wenn sie dir geholfen hat, schick sie an jemanden, dem sie nützen könnte.", "Teilen", "Nachricht kopieren", "Kopiert"),
+    "fr": ("Aidez {app} à toucher plus de monde", "{app} est gratuite et ne rapporte rien : elle ne se fait connaître que si on la partage. Si elle vous a aidé, envoyez-la à quelqu'un à qui elle pourrait servir.", "Partager", "Copier le message", "Copié"),
+    "id": ("Bantu {app} menjangkau lebih banyak orang", "{app} gratis dan tidak menghasilkan pendapatan, jadi hanya bisa berkembang kalau orang membagikannya. Kalau aplikasi ini membantu Anda, kirimkan ke orang yang mungkin membutuhkannya.", "Bagikan", "Salin pesan", "Disalin"),
+    "tr": ("{app} uygulamasının daha çok kişiye ulaşmasına yardım edin", "{app} ücretsizdir ve hiçbir gelir elde etmez; yalnızca insanlar paylaştıkça büyür. İşinize yaradıysa, faydalı bulabilecek birine gönderin.", "Paylaş", "Mesajı kopyala", "Kopyalandı"),
+    "ru": ("Помогите {app} найти больше пользователей", "{app} бесплатное и не приносит дохода, поэтому о нём узнают, только когда люди им делятся. Если оно вам помогло, отправьте его тому, кому оно может пригодиться.", "Поделиться", "Скопировать сообщение", "Скопировано"),
+    "el": ("Βοηθήστε το {app} να φτάσει σε περισσότερους", "Το {app} είναι δωρεάν και δεν αποφέρει έσοδα, οπότε μεγαλώνει μόνο όταν το μοιράζεστε. Αν σας βοήθησε, στείλτε το σε κάποιον που μπορεί να του φανεί χρήσιμο.", "Κοινοποίηση", "Αντιγραφή μηνύματος", "Αντιγράφηκε"),
+    "vi": ("Giúp {app} đến với nhiều người hơn", "{app} miễn phí và không tạo ra thu nhập, nên chỉ được biết đến khi mọi người chia sẻ. Nếu ứng dụng hữu ích với bạn, hãy gửi cho người có thể cần đến.", "Chia sẻ", "Sao chép tin nhắn", "Đã sao chép"),
+    "ja": ("{app} をもっと多くの人に届けるために", "{app} は無料で、収益は一切ありません。広まるのは、使った人がシェアしてくれたときだけです。役に立ったら、必要としていそうな人に送ってください。", "共有", "メッセージをコピー", "コピーしました"),
+    "ar": ("ساعد {app} على الوصول إلى مزيد من الناس", "{app} مجاني ولا يحقق أي دخل، لذلك لا ينتشر إلا عندما يشاركه الناس. إذا أفادك، فأرسله إلى شخص قد يحتاج إليه.", "مشاركة", "نسخ الرسالة", "تم النسخ"),
+    "bn": ("{app}-কে আরও মানুষের কাছে পৌঁছাতে সাহায্য করুন", "{app} বিনামূল্যে এবং এটি থেকে কোনো আয় হয় না, তাই মানুষ শেয়ার করলেই এটি ছড়িয়ে পড়ে। এটি আপনার কাজে লাগলে, যার কাজে আসতে পারে তাকে পাঠিয়ে দিন।", "শেয়ার করুন", "মেসেজ কপি করুন", "কপি হয়েছে"),
+    "te": ("{app} మరింత మందికి చేరడానికి సహాయం చేయండి", "{app} ఉచితం, దీని నుంచి ఎలాంటి ఆదాయమూ రాదు, కాబట్టి ప్రజలు షేర్ చేసినప్పుడే ఇది ఎక్కువ మందికి చేరుతుంది. ఇది మీకు ఉపయోగపడితే, అవసరమైన వారికి పంపండి.", "షేర్ చేయండి", "మెసేజ్ కాపీ చేయండి", "కాపీ అయింది"),
+    "ta": ("{app} மேலும் பலரைச் சென்றடைய உதவுங்கள்", "{app} இலவசம், இதனால் எந்த வருமானமும் இல்லை; மக்கள் பகிர்ந்தால் மட்டுமே இது பலரைச் சென்றடையும். உங்களுக்கு உதவியிருந்தால், தேவைப்படக்கூடியவருக்கு அனுப்புங்கள்.", "பகிர்", "செய்தியை நகலெடு", "நகலெடுக்கப்பட்டது"),
+    "ml": ("{app} കൂടുതൽ ആളുകളിലേക്ക് എത്താൻ സഹായിക്കൂ", "{app} സൗജന്യമാണ്, ഇതിൽ നിന്ന് ഒരു വരുമാനവുമില്ല; ആളുകൾ പങ്കിടുമ്പോൾ മാത്രമാണ് ഇത് കൂടുതൽ പേരിലേക്ക് എത്തുന്നത്. ഇത് നിങ്ങൾക്ക് ഉപകാരപ്പെട്ടെങ്കിൽ, ആവശ്യമുള്ള ഒരാൾക്ക് അയച്ചുകൊടുക്കൂ.", "പങ്കിടുക", "സന്ദേശം പകർത്തുക", "പകർത്തി"),
+    "af": ("Help {app} om meer mense te bereik", "{app} is gratis en verdien niks, so dit groei net as mense dit deel. As dit jou gehelp het, stuur dit vir iemand wat dit nuttig kan vind.", "Deel", "Kopieer boodskap", "Gekopieer"),
+    "nl": ("Help {app} meer mensen te bereiken", "{app} is gratis en verdient niets, dus de app groeit alleen als mensen hem delen. Heb je er iets aan gehad? Stuur hem dan naar iemand die er ook iets aan kan hebben.", "Delen", "Bericht kopiëren", "Gekopieerd"),
+    "it": ("Aiuta {app} a raggiungere più persone", "{app} è gratuita e non guadagna nulla, quindi cresce solo se le persone la condividono. Se ti è stata utile, inviala a qualcuno a cui potrebbe servire.", "Condividi", "Copia messaggio", "Copiato"),
+    "ko": ("더 많은 사람에게 {app} 알리기", "이 앱은 무료이며 수익이 전혀 없어서, 사람들이 공유해야만 더 많은 사람에게 알려집니다. 도움이 되었다면 필요할 것 같은 분께 보내 주세요.", "공유", "메시지 복사", "복사됨"),
+    "sv": ("Hjälp {app} att nå fler", "{app} är gratis och tjänar inga pengar, så appen växer bara när folk delar den. Om den har hjälpt dig, skicka den till någon som kan ha nytta av den.", "Dela", "Kopiera meddelande", "Kopierat"),
+    "th": ("ช่วยให้ {app} ไปถึงผู้คนมากขึ้น", "{app} ใช้ฟรีและไม่มีรายได้ใดๆ จึงจะเป็นที่รู้จักได้ก็ต่อเมื่อมีคนแชร์ หากแอปนี้มีประโยชน์กับคุณ ส่งต่อให้คนที่อาจต้องการได้เลย", "แชร์", "คัดลอกข้อความ", "คัดลอกแล้ว"),
+}
