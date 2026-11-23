@@ -300,7 +300,7 @@
     for (var hh = hearts.length - 1; hh >= 0; hh--) {
       var ht = (t - hearts[hh].born) / 1500;
       if (ht >= 1) { hearts.splice(hh, 1); continue; }
-      var hx = hearts[hh].x + Math.sin(ht * 9) * 6, hy = hearts[hh].y - ht * 95, hs = 13 + ht * 5;
+      var hx = hearts[hh].x + Math.sin(ht * 6) * 3, hy = hearts[hh].y - ht * 70, hs = 10 + ht * 3;
       lx.globalAlpha = ht < 0.15 ? ht / 0.15 : 1 - (ht - 0.15) / 0.85;
       lx.fillStyle = '#ff8a8a';
       lx.beginPath();
@@ -332,56 +332,41 @@
     }
   }
 
-  /* ---------- the dog: small, unhurried moves ---------- */
+  /* ---------- the dog: small, calm moves; it always faces the same way ---------- */
   var headA = 0, headTo = 0, nextLook = 0;
-  var face = 1, turnedUntil = 0, lookUpUntil = 0, petAt = -1e9;
-  var DOG_CX = 160.8; /* the dog's middle, in the lamp drawing's units: it turns around on this line */
+  var lookUpUntil = 0, petAt = -1e9;
 
   function dogTick(t) {
     if (!dogMove) return;
-    /* looks up at the swarm, or out at the street, every few seconds */
+    /* now and then a slight glance up at the swarm or out at the street */
     if (t > nextLook) {
       var watching = bugs.length > 4;
-      headTo = watching && Math.random() < 0.7 ? 11 + Math.random() * 5 : (Math.random() < 0.5 ? 0 : -4); /* positive tips the nose up */
-      nextLook = t + 2500 + Math.random() * 4500;
+      headTo = watching && Math.random() < 0.6 ? 6 : (Math.random() < 0.5 ? 0 : -2); /* positive tips the nose up */
+      nextLook = t + 4000 + Math.random() * 5000;
     }
     var since = t - flinchAt;
     var flinch = since > 0 && since < 700 ? Math.sin(since / 700 * Math.PI) : 0; /* ducks a little at the thunder */
 
-    /* boats: watched as they come (the dog faces left, the way they come from), then it turns round to see
-       them go, and turns back a moment after they've gone */
+    /* a boat close by gets a small nod towards it */
     var aim = headTo, excited = false;
-    if (boatDx > -320 && boatDx < -15) {
-      aim = -5 - (1 - (-boatDx) / 320) * 8; /* the closer it gets, the further the nose dips */
-      excited = true;
-    } else if (boatDx >= -15 && boatDx < 300) {
-      turnedUntil = t + 1200;
-      aim = -6;
-      excited = true;
-    }
-    var faceTo = t < turnedUntil ? -1 : 1;
-    face += (faceTo - face) * 0.12;
-    if (Math.abs(face) < 0.02) face = faceTo * 0.02; /* never perfectly edge-on */
-
-    if (t < lookUpUntil && !excited) aim = 15; /* the lamp flickered: the dog looks up at it, and so do we (a boat matters more) */
-    if (outAt >= 0 && t - outAt > 500) aim = 14; /* in the dark it looks up at the lamp, waiting */
+    if (Math.abs(boatDx) < 200) { aim = -3; excited = true; }
+    if (t < lookUpUntil && !excited) aim = 7; /* the lamp flickered: a glance up at it */
+    if (outAt >= 0 && t - outAt > 500) aim = 7; /* in the dark it looks up at the lamp, waiting */
     var petted = t - petAt;
-    if (petted > 0 && petted < 1600) aim = 9 + Math.sin(petted / 1600 * Math.PI) * 6; /* a happy tilt up */
-    headA += (aim - flinch * 7 - headA) * 0.07;
+    if (petted > 0 && petted < 1400) aim = 4 + Math.sin(petted / 1400 * Math.PI) * 3; /* a content tilt when patted */
+    headA += (aim - flinch * 4 - headA) * 0.035;
     dogHead.setAttribute('transform', 'rotate(' + headA.toFixed(2) + ' 108 78)');
     if (eyeHead) eyeHead.setAttribute('transform', dogHead.getAttribute('transform'));
 
-    var wag = level < 0.45 ? Math.sin(t * 0.012) * 7 : Math.sin(t * 0.004) * 2;
-    if (excited) wag = Math.sin(t * 0.024) * 9;
+    var wag = Math.sin(t * 0.004) * 2;
+    if (excited || level < 0.45) wag = Math.sin(t * 0.008) * 4;
     var glad = Math.min(t - happyAt, petted);
-    if (glad > 0 && glad < 2200) wag = Math.sin(t * 0.032) * 12 * (1 - glad / 2200 * 0.4); /* light back, or a pat: a happy wag */
+    if (glad > 0 && glad < 1800) wag = Math.sin(t * 0.012) * 6 * (1 - glad / 1800); /* light back, or a pat: a short wag */
     dogTail.setAttribute('transform', 'rotate(' + wag.toFixed(2) + ' 147 150)');
 
     var shake = 0, s = t - shakeAt;
-    if (shakeAt && s > 0 && s < 900) shake = Math.sin(s * 0.11) * 4 * (1 - s / 900); /* shakes the rain off */
-    var hop = petted > 0 && petted < 420 ? Math.sin(petted / 420 * Math.PI) * 6 : 0; /* a little bounce when patted */
-    dogMove.setAttribute('transform', 'translate(' + DOG_CX + ' 0) scale(' + face.toFixed(3) + ' 1) translate(' + (-DOG_CX) + ' 0) ' +
-      'translate(52 ' + (368 + flinch * 2 - hop).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)');
+    if (shakeAt && s > 0 && s < 900) shake = Math.sin(s * 0.08) * 2 * (1 - s / 900); /* shakes the rain off */
+    dogMove.setAttribute('transform', 'translate(52 ' + (368 + flinch * 1.5).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)');
     if (eyeMove) eyeMove.setAttribute('transform', dogMove.getAttribute('transform'));
   }
 
@@ -756,7 +741,7 @@
     }, 15000);
   }
 
-  /* pat the dog: a bounce, a wag, a tilt of the head and a small heart */
+  /* pat the dog: a short wag, a tilt of the head and a small heart */
   var dogHit = lamp ? lamp.querySelector('.dog-hit') : null;
   if (dogHit && !reduced) {
     dogHit.addEventListener('click', function (e) {
@@ -764,7 +749,7 @@
       var now = performance.now();
       if (now - petAt < 500) return;
       petAt = now;
-      hearts.push({ x: face > 0 ? 133 : 188, y: 392, born: now });
+      hearts.push({ x: 133, y: 392, born: now });
     });
   }
 
