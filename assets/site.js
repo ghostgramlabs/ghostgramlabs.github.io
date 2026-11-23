@@ -457,7 +457,7 @@
       (face < 0 ? ' translate(' + DOG_CX + ' 0) scale(-1 1) translate(' + (-DOG_CX) + ' 0)' : '') +
       ' translate(52 ' + (368 + flinch * 1.5).toFixed(2) + ') scale(.85)' +
       /* standing, the dog is drawn lower than it sits; grow it a touch from the feet so it doesn't seem to shrink */
-      (ps > 0 ? ' translate(128 227) scale(' + (1 + 0.15 * ps).toFixed(4) + ') translate(-128 -227)' : '') +
+      (ps > 0 ? ' translate(128 227) scale(' + (1 + 0.2 * ps).toFixed(4) + ') translate(-128 -227)' : '') +
       ' rotate(' + shake.toFixed(2) + ' 120 210)';
     dogMove.setAttribute('transform', tr);
     if (eyeMove) eyeMove.setAttribute('transform', tr);
