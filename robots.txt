@@ -27,3 +27,4 @@ User-agent: CCBot
 Allow: /
 
 Sitemap: https://ghostgramlabs.com/sitemap.xml
+Sitemap: https://ghostgramlabs.com/sitemap-l10n.xml

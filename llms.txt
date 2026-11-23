@@ -71,3 +71,9 @@ Google Play developer page: https://play.google.com/store/apps/developer?id=Ghos
 - PettiBox: Petti Box, PettiBox: Save & Find, save for later app, read it later app, Pocket alternative, link saver, bookmark app for Android, screenshot organizer.
 - DirectServe: Direct Serve, DirectServe: File Transfer, DirectServe: Cast & File Share, cast phone to TV, WiFi file transfer, screen mirroring app, Android to iPhone file sharing, AirDrop alternative for Android, phone as media server.
 - SpeakAlert: Speak Alert, talking reminder, voice reminder, talking alarm clock, text-to-speech reminder, spoken medicine reminder.
+
+## Pages in other languages
+Each app page is also available in the languages of its Play Store listing, for example
+https://ghostgramlabs.com/PettiBox/hi/, https://ghostgramlabs.com/DirectServe/ja/ and https://ghostgramlabs.com/SpeakAlert/es/.
+The full list is in https://ghostgramlabs.com/sitemap-l10n.xml. Every page says the same thing about who makes the apps:
+GhostGram Labs is not a company; the apps are free side projects by one independent developer and earn nothing.
