@@ -230,7 +230,7 @@
     lx.save();
     lx.translate(x, y);
     lx.rotate(ang);
-    lx.globalAlpha = alpha;
+    lx.globalAlpha = alpha * (0.12 + 0.88 * lit); /* they vanish into the dark when the lamp goes out */
     lx.fillStyle = 'rgba(255, 246, 228, 0.72)'; /* long see-through wings, swept back */
     lx.beginPath();
     lx.ellipse(-5, -1.3 - flap, 6.2, 1.5, -0.16 - flap * 0.12, 0, 6.283);
@@ -256,6 +256,7 @@
     lx.strokeStyle = 'rgba(255, 220, 170, 0.5)';
     lx.lineWidth = 1.3;
     lx.lineCap = 'round';
+    lx.globalAlpha = 0.08 + 0.92 * lit;
     for (var i = 0; i < litDrops.length; i++) {
       var d = litDrops[i];
       d.y += d.v * dt;
@@ -267,6 +268,7 @@
       lx.lineTo(x + d.l * 0.2, d.y - d.l);
       lx.stroke();
     }
+    lx.globalAlpha = 1;
 
     /* termites come out once the rain eases, as they really do, and scatter when it pours */
     var wantBugs = level < 0.45 ? Math.round((0.45 - level) / 0.33 * (small ? 16 : 30)) : 0;
@@ -293,6 +295,26 @@
         if (b.fy > 556 || left <= 0) bugs.splice(j, 1);
       }
     }
+
+    /* fireflies, only ever seen in the dark */
+    if (flies.length) {
+      var since = outAt >= 0 ? t - outAt : 1e9;
+      var fa = since < 600 ? 0 : since < 1000 ? (since - 600) / 400 : since < 2650 ? 1 : Math.max(0, 1 - (since - 2650) / 300);
+      for (var k = 0; k < flies.length; k++) {
+        var f = flies[k];
+        f.x += Math.sin(t * 0.0011 + f.ph) * 0.35;
+        f.y += Math.cos(t * 0.0009 + f.ph * 1.7) * 0.25 - 0.06;
+        var pulse = fa * (0.45 + 0.55 * Math.max(0, Math.sin(t * 0.004 + f.ph * 3)));
+        lx.globalAlpha = pulse * 0.22;
+        lx.fillStyle = '#c8ff7a';
+        lx.beginPath(); lx.arc(f.x, f.y, 7, 0, 6.283); lx.fill();
+        lx.globalAlpha = pulse;
+        lx.fillStyle = '#efffc4';
+        lx.beginPath(); lx.arc(f.x, f.y, 2.1, 0, 6.283); lx.fill();
+      }
+      lx.globalAlpha = 1;
+      if (outAt < 0) flies = [];
+    }
   }
 
   /* ---------- the dog: small, unhurried moves ---------- */
@@ -308,16 +330,21 @@
     }
     var since = t - flinchAt;
     var flinch = since > 0 && since < 700 ? Math.sin(since / 700 * Math.PI) : 0; /* ducks a little at the thunder */
-    var aim = boatNear ? -9 : headTo; /* a boat going by gets a look */
+    /* a boat going by gets a look; in the dark the dog looks up at the lamp, waiting for it */
+    var aim = outAt >= 0 && t - outAt > 500 ? 14 : boatNear ? -9 : headTo;
     headA += (aim - flinch * 7 - headA) * 0.06;
     dogHead.setAttribute('transform', 'rotate(' + headA.toFixed(2) + ' 108 78)');
+    if (eyeHead) eyeHead.setAttribute('transform', dogHead.getAttribute('transform'));
 
     var wag = level < 0.45 ? Math.sin(t * 0.012) * 7 : Math.sin(t * 0.004) * 2;
+    var glad = t - happyAt;
+    if (glad > 0 && glad < 2200) wag = Math.sin(t * 0.032) * 12 * (1 - glad / 2200 * 0.4); /* the light's back: a happy wag */
     dogTail.setAttribute('transform', 'rotate(' + wag.toFixed(2) + ' 147 150)');
 
     var shake = 0, s = t - shakeAt;
     if (shakeAt && s > 0 && s < 900) shake = Math.sin(s * 0.11) * 4 * (1 - s / 900); /* shakes the rain off */
     dogMove.setAttribute('transform', 'translate(52 ' + (368 + flinch * 2).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)');
+    if (eyeMove) eyeMove.setAttribute('transform', dogMove.getAttribute('transform'));
   }
 
   /* ---------- the street: rain splashing on it, water running along the gutter, and paper boats ---------- */
@@ -511,24 +538,175 @@
     hero.addEventListener('click', function (e) {
       if (!onStreet(e)) return;
       dropBoat(e.clientX, e.clientY, performance.now());
-      if (hint) { hint.classList.add('gone'); hint = null; }
-      try { localStorage.setItem('gg-boat', '1'); } catch (err) {}
+      if (!floated) {
+        floated = true;
+        try { localStorage.setItem('gg-boat', '1'); } catch (err) {}
+        hideHint();
+        /* one secret found: point at the next one, a moment later, and let the lamp flicker to catch the eye */
+        if (!lampFound) {
+          setTimeout(function () { if (!lampFound) showHint(LAMP_HINT); }, 1600);
+          teaseAt = performance.now() + 2600;
+        }
+      }
     });
     hero.addEventListener('mousemove', function (e) {
       hero.classList.toggle('boat-zone', onStreet(e));
     });
   }
 
-  /* a small invitation, until the visitor has floated their first boat */
-  var hint = null, floated = false;
-  try { floated = localStorage.getItem('gg-boat') === '1'; } catch (err) {}
-  if (street && !floated) {
-    hint = document.createElement('div');
-    hint.className = 'boat-hint';
-    hint.setAttribute('aria-hidden', 'true');
-    hint.textContent = small ? 'tap the wet street to float a paper boat ↓' : '↓ click the wet street to float a paper boat';
-    street.appendChild(hint);
+  /* small invitations, one at a time: float a boat first, then the lamp. Each shows only until it's been found. */
+  var BOAT_HINT = small ? 'tap the wet street to float a paper boat ↓' : '↓ click the wet street to float a paper boat';
+  var LAMP_HINT = 'psst… that lamp looks a little loose ↗';
+  var FOUND_NOTE = 'you found it. the dog was hoping someone would.';
+  var hint = null, floated = false, lampFound = false;
+  try {
+    floated = localStorage.getItem('gg-boat') === '1';
+    lampFound = localStorage.getItem('gg-lamp') === '1';
+  } catch (err) {}
+
+  function showHint(text) {
+    if (!street) return;
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.className = 'boat-hint gone';
+      hint.setAttribute('aria-hidden', 'true');
+      street.appendChild(hint);
+      void hint.offsetWidth; /* so it fades in */
+    }
+    hint.textContent = text;
+    hint.classList.remove('gone');
   }
+
+  function hideHint() { if (hint) hint.classList.add('gone'); }
+
+  if (!floated) showHint(BOAT_HINT);
+  else if (!lampFound) showHint(LAMP_HINT);
+
+  /* ---------- lights out: tap the lamp and it flickers and dies; in the dark only the dog's eye glows,
+     then the light buzzes back and the dog is glad. Now and then the lamp flickers on its own, as if
+     the wire were loose, which is the only invitation it gets. ---------- */
+  var cone = lamp ? lamp.querySelector('.cone') : null;
+  var bulb = lamp ? lamp.querySelector('.bulb') : null;
+  var pool = lamp ? lamp.querySelector('.pool') : null;
+  var eyes = lamp ? lamp.querySelector('.dog-eyes') : null;
+  var eyeGlow = lamp ? lamp.querySelector('.dog-eye-glow') : null;
+  var eyeMove = lamp ? lamp.querySelector('.dog-eye-move') : null;
+  var eyeHead = lamp ? lamp.querySelector('.dog-eye-head') : null;
+  var dogUse = lamp ? lamp.querySelector('.dog-use') : null;
+  var nightF = lamp ? lamp.querySelectorAll('.night-f') : [];
+  var hit = lamp ? lamp.querySelector('.lamp-hit') : null;
+  var lit = 1, outAt = -1, outBlinks = 1, outFirst = false, happyAt = -1e9, flies = [];
+  var teaseAt = 0, teaseFrom = -1;
+  /* [ms, light]: flicker, die, a dark pause, then stutter back on */
+  var SEQ = [[0, 1], [60, 0.25], [120, 0.9], [190, 0.1], [260, 0.75], [330, 0.05], [420, 0],
+             [2700, 0.45], [2770, 0], [2850, 0.85], [2930, 0.3], [3010, 1]];
+  var SEQ_END = 3010;
+  var TEASE = [[0, 1], [40, 0.4], [110, 1], [190, 0.55], [240, 1]];
+
+  function stepAt(steps, ms) {
+    var v = steps[0][1];
+    for (var i = 0; i < steps.length; i++) if (ms >= steps[i][0]) v = steps[i][1];
+    return v;
+  }
+
+  function applyLight(eyeA, eyeOpen) {
+    if (cone) cone.style.opacity = lit.toFixed(3);
+    if (bulb) bulb.setAttribute('opacity', (0.28 + 0.72 * lit).toFixed(3));
+    if (pool) pool.setAttribute('opacity', (0.18 * lit).toFixed(3));
+    if (eyes) eyes.setAttribute('opacity', eyeA.toFixed(3));
+    if (eyeGlow) eyeGlow.setAttribute('ry', (2.8 * eyeOpen).toFixed(2));
+    /* the dog sinks into the dark with the light, a little bluer, like the night */
+    if (dogUse) {
+      if (lit >= 0.999) { dogUse.removeAttribute('filter'); return; }
+      var k = 0.14 + 0.86 * lit;
+      for (var i = 0; i < nightF.length; i++) nightF[i].setAttribute('slope', (i === 2 ? Math.min(1, k * 1.35) : k).toFixed(3));
+      dogUse.setAttribute('filter', 'url(#night)');
+    }
+  }
+
+  function lampTick(t) {
+    if (outAt >= 0) {
+      var s = t - outAt;
+      if (s >= SEQ_END) {
+        outAt = -1;
+        lit = 1;
+        happyAt = t;
+        applyLight(0, 1);
+        if (outFirst) {
+          outFirst = false;
+          showHint(FOUND_NOTE);
+          setTimeout(hideHint, 5000);
+        }
+        teaseAt = t + 25000 + Math.random() * 15000;
+        return;
+      }
+      lit = stepAt(SEQ, s);
+      var eyeA = s < 650 ? 0 : s < 900 ? (s - 650) / 250 : s < 2700 ? 1 : 0;
+      var open = 1;
+      if (s > 1500 && s < 1620) open = 0.12;
+      if (outBlinks > 1 && s > 1760 && s < 1880) open = 0.12;
+      applyLight(eyeA, open);
+      return;
+    }
+    /* the loose wire */
+    if (teaseFrom < 0 && teaseAt && t > teaseAt) teaseFrom = t;
+    if (teaseFrom >= 0) {
+      var e = t - teaseFrom;
+      lit = e > 240 ? 1 : stepAt(TEASE, e);
+      applyLight(0, 1);
+      if (e > 240) {
+        teaseFrom = -1;
+        /* sooner while it's still a secret, rarer once it's been found */
+        teaseAt = t + (lampFound ? 25000 + Math.random() * 15000 : 9000 + Math.random() * 9000);
+      }
+    }
+  }
+
+  function lightsOut() {
+    if (outAt >= 0) return;
+    var n = 0;
+    try { n = parseInt(localStorage.getItem('gg-lamp-n') || '0', 10) || 0; localStorage.setItem('gg-lamp-n', String(n + 1)); } catch (err) {}
+    outFirst = !lampFound;
+    if (!lampFound) {
+      lampFound = true;
+      try { localStorage.setItem('gg-lamp', '1'); } catch (err) {}
+      hideHint();
+    }
+    /* the first time it's always the glowing eye; after that it varies a little, so it stays worth a tap */
+    var roll = Math.random();
+    outBlinks = n > 0 && roll < 0.3 ? 2 : 1;
+    if (n > 0 && roll >= 0.3 && roll < 0.7) {
+      for (var i = 0; i < 7; i++) flies.push({ x: 50 + Math.random() * 240, y: 330 + Math.random() * 190, ph: Math.random() * 6.283 });
+    }
+    teaseFrom = -1;
+    if (reduced) {
+      /* no flicker, no movement: the light simply goes out for a moment and comes back */
+      lit = 0;
+      applyLight(1, 1);
+      drawLamp(0, 0);
+      outAt = 0;
+      setTimeout(function () {
+        outAt = -1; lit = 1; flies = [];
+        applyLight(0, 1);
+        drawLamp(0, 0);
+        if (outFirst) { outFirst = false; showHint(FOUND_NOTE); setTimeout(hideHint, 5000); }
+      }, 2200);
+      return;
+    }
+    outAt = performance.now();
+  }
+
+  if (hit) {
+    hit.addEventListener('click', function (e) {
+      e.stopPropagation();
+      lightsOut();
+    });
+    /* pointing at it gets a flicker back: something's here */
+    hit.addEventListener('mouseenter', function () {
+      if (!reduced && outAt < 0 && teaseFrom < 0) teaseAt = performance.now();
+    });
+  }
+  if (!reduced && !lampFound) teaseAt = performance.now() + (floated ? 4000 : 20000);
 
   /* ---------- lightning ---------- */
   /* a jagged path from the clouds down through the open sky, with one fork */
@@ -595,6 +773,7 @@
     if (t > holdUntil) flash *= Math.pow(0.05, dt); /* holds a moment, then fades over about a second */
 
     drawSky(dt);
+    lampTick(t);
     drawLamp(t, dt);
     drawStreet(t, dt);
     dogTick(t);

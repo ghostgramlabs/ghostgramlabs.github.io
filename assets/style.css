@@ -817,3 +817,18 @@ footer .brand { color: var(--ink); }
 .share-band .cta-row { flex-wrap: wrap; gap: 10px; }
 .share-band .btn { padding: 10px 18px; font-size: 0.88rem; }
 .share-band [hidden] { display: none; }
+
+/* Lights out: the lamp head can be tapped (an easter egg; decorative, so not in the tab order) */
+.lamp-hit {
+  position: absolute;
+  left: 54%;
+  top: 6%;
+  width: 36%;
+  height: 22%;
+  z-index: 2;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.secret-note { color: var(--muted); font-family: var(--font-quirk); font-style: italic; font-size: 0.84rem; margin-top: 10px; opacity: 0.8; }

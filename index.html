@@ -49,7 +49,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Fraunces:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=20261122a">
+<link rel="stylesheet" href="/assets/style.css?v=20261122b">
 
 <!-- Structured data: Person (independent developer) + WebSite + Apps -->
 <script type="application/ld+json">
@@ -190,6 +190,8 @@
       <div class="lamp">
         <svg viewBox="0 0 320 590" focusable="false">
           <defs>
+            <!-- night: dims the dog when the lamp goes out (the slopes are set from site.js) -->
+            <filter id="night" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR class="night-f" type="linear" slope="1"/><feFuncG class="night-f" type="linear" slope="1"/><feFuncB class="night-f" type="linear" slope="1"/></feComponentTransfer></filter>
             <clipPath id="ground-clip"><rect x="-200" y="561" width="720" height="40"/></clipPath>
             <g id="dog-fig">
               <g class="dog-move" transform="translate(52 368) scale(.85)">
@@ -232,15 +234,20 @@
             <polygon points="203,80 6,561 334,561" fill="#ff9f43" opacity=".2"/>
             <polygon points="203,80 74,561 280,561" fill="#ffb866" opacity=".16"/>
           </g>
-          <ellipse cx="146" cy="573" rx="130" ry="8" fill="#ff9f43" opacity=".18"/>
+          <ellipse class="pool" cx="146" cy="573" rx="130" ry="8" fill="#ff9f43" opacity=".18"/>
           <path d="M262 562C261 430 264 300 261 170 260 120 260 92 252 80 244 68 222 66 210 72" fill="none" stroke="#120d16" stroke-width="7" stroke-linecap="round"/>
           <path d="M190 68l30-4-5 15-22 1z" fill="#120d16"/>
           <ellipse class="bulb" cx="203" cy="80" rx="10" ry="5" fill="#ffe0ad"/>
           <g clip-path="url(#ground-clip)" opacity=".16"><use href="#dog-fig" transform="translate(0 1122) scale(1 -1)"/></g>
           <ellipse cx="150" cy="561.5" rx="48" ry="5" fill="#0d0911" opacity=".75"/>
-          <use href="#dog-fig"/>
+          <use class="dog-use" href="#dog-fig"/>
+          <!-- the dog's eye, on its own layer so it stays bright in the dark; moves with the dog's head -->
+          <g class="dog-eye-move" transform="translate(52 368) scale(.85)"><g class="dog-eye-head">
+            <g class="dog-eyes" opacity="0"><circle cx="89" cy="49.8" r="15" fill="#c8ff7a" opacity=".12"/><circle cx="89" cy="49.8" r="8" fill="#c8ff7a" opacity=".3"/><ellipse class="dog-eye-glow" cx="89" cy="49.8" rx="4" ry="2.8" fill="#f2ffd0"/></g>
+          </g></g>
         </svg>
         <canvas class="lamp-canvas"></canvas>
+        <div class="lamp-hit"></div>
       </div>
     </div>
   </section>
@@ -457,6 +464,7 @@
       <div class="f-col">
         <a class="brand" href="/"><span class="brand-mark"><img src="/assets/img/ghostgramlabs-icon.svg" alt="" width="32" height="32"></span>GhostGram Labs</a>
         <p style="color:var(--muted);font-size:0.88rem;max-width:280px;margin-top:12px">Free Android side projects by an independent developer — not a company, just useful tools. Built with care, shared without ads — so useful tools stay free. The apps earn nothing.</p>
+        <p class="secret-note">There are a couple of secrets hidden on this page.</p>
       </div>
       <div class="f-col">
         <h4>Apps</h4>
@@ -481,6 +489,6 @@
     <div class="footer-bottom">© 2026 GhostGram Labs. Google Play and the Google Play logo are trademarks of Google LLC.</div>
   </div>
 </footer>
-<script src="/assets/site.js?v=20261122a" defer></script>
+<script src="/assets/site.js?v=20261122b" defer></script>
 </body>
 </html>
