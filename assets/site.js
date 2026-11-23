@@ -194,7 +194,7 @@
   var lamp = document.querySelector('.lamp');
   var lc = lamp ? lamp.querySelector('.lamp-canvas') : null;
   var lx = lc ? lc.getContext('2d') : null;
-  var bugs = [], litDrops = [];
+  var bugs = [], litDrops = [], hearts = [];
   var dogMove = lamp ? lamp.querySelector('.dog-move') : null;
   var dogHead = lamp ? lamp.querySelector('.dog-head') : null;
   var dogTail = lamp ? lamp.querySelector('.dog-tail') : null;
@@ -296,6 +296,21 @@
       }
     }
 
+    /* hearts from a pat: rise, sway, fade */
+    for (var hh = hearts.length - 1; hh >= 0; hh--) {
+      var ht = (t - hearts[hh].born) / 1500;
+      if (ht >= 1) { hearts.splice(hh, 1); continue; }
+      var hx = hearts[hh].x + Math.sin(ht * 9) * 6, hy = hearts[hh].y - ht * 95, hs = 13 + ht * 5;
+      lx.globalAlpha = ht < 0.15 ? ht / 0.15 : 1 - (ht - 0.15) / 0.85;
+      lx.fillStyle = '#ff8a8a';
+      lx.beginPath();
+      lx.moveTo(hx, hy + hs * 0.9);
+      lx.bezierCurveTo(hx - hs * 1.3, hy, hx - hs * 0.7, hy - hs * 0.9, hx, hy - hs * 0.25);
+      lx.bezierCurveTo(hx + hs * 0.7, hy - hs * 0.9, hx + hs * 1.3, hy, hx, hy + hs * 0.9);
+      lx.fill();
+      lx.globalAlpha = 1;
+    }
+
     /* fireflies, only ever seen in the dark */
     if (flies.length) {
       var since = outAt >= 0 ? t - outAt : 1e9;
@@ -319,6 +334,8 @@
 
   /* ---------- the dog: small, unhurried moves ---------- */
   var headA = 0, headTo = 0, nextLook = 0;
+  var face = 1, turnedUntil = 0, lookUpUntil = 0, petAt = -1e9;
+  var DOG_CX = 160.8; /* the dog's middle, in the lamp drawing's units: it turns around on this line */
 
   function dogTick(t) {
     if (!dogMove) return;
@@ -330,20 +347,41 @@
     }
     var since = t - flinchAt;
     var flinch = since > 0 && since < 700 ? Math.sin(since / 700 * Math.PI) : 0; /* ducks a little at the thunder */
-    /* a boat going by gets a look; in the dark the dog looks up at the lamp, waiting for it */
-    var aim = outAt >= 0 && t - outAt > 500 ? 14 : boatNear ? -9 : headTo;
-    headA += (aim - flinch * 7 - headA) * 0.06;
+
+    /* boats: watched as they come (the dog faces left, the way they come from), then it turns round to see
+       them go, and turns back a moment after they've gone */
+    var aim = headTo, excited = false;
+    if (boatDx > -320 && boatDx < -15) {
+      aim = -5 - (1 - (-boatDx) / 320) * 8; /* the closer it gets, the further the nose dips */
+      excited = true;
+    } else if (boatDx >= -15 && boatDx < 300) {
+      turnedUntil = t + 1200;
+      aim = -6;
+      excited = true;
+    }
+    var faceTo = t < turnedUntil ? -1 : 1;
+    face += (faceTo - face) * 0.12;
+    if (Math.abs(face) < 0.02) face = faceTo * 0.02; /* never perfectly edge-on */
+
+    if (t < lookUpUntil && !excited) aim = 15; /* the lamp flickered: the dog looks up at it, and so do we (a boat matters more) */
+    if (outAt >= 0 && t - outAt > 500) aim = 14; /* in the dark it looks up at the lamp, waiting */
+    var petted = t - petAt;
+    if (petted > 0 && petted < 1600) aim = 9 + Math.sin(petted / 1600 * Math.PI) * 6; /* a happy tilt up */
+    headA += (aim - flinch * 7 - headA) * 0.07;
     dogHead.setAttribute('transform', 'rotate(' + headA.toFixed(2) + ' 108 78)');
     if (eyeHead) eyeHead.setAttribute('transform', dogHead.getAttribute('transform'));
 
     var wag = level < 0.45 ? Math.sin(t * 0.012) * 7 : Math.sin(t * 0.004) * 2;
-    var glad = t - happyAt;
-    if (glad > 0 && glad < 2200) wag = Math.sin(t * 0.032) * 12 * (1 - glad / 2200 * 0.4); /* the light's back: a happy wag */
+    if (excited) wag = Math.sin(t * 0.024) * 9;
+    var glad = Math.min(t - happyAt, petted);
+    if (glad > 0 && glad < 2200) wag = Math.sin(t * 0.032) * 12 * (1 - glad / 2200 * 0.4); /* light back, or a pat: a happy wag */
     dogTail.setAttribute('transform', 'rotate(' + wag.toFixed(2) + ' 147 150)');
 
     var shake = 0, s = t - shakeAt;
     if (shakeAt && s > 0 && s < 900) shake = Math.sin(s * 0.11) * 4 * (1 - s / 900); /* shakes the rain off */
-    dogMove.setAttribute('transform', 'translate(52 ' + (368 + flinch * 2).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)');
+    var hop = petted > 0 && petted < 420 ? Math.sin(petted / 420 * Math.PI) * 6 : 0; /* a little bounce when patted */
+    dogMove.setAttribute('transform', 'translate(' + DOG_CX + ' 0) scale(' + face.toFixed(3) + ' 1) translate(' + (-DOG_CX) + ' 0) ' +
+      'translate(52 ' + (368 + flinch * 2 - hop).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)');
     if (eyeMove) eyeMove.setAttribute('transform', dogMove.getAttribute('transform'));
   }
 
@@ -351,7 +389,7 @@
   var ground = document.querySelector('.street-ground');
   var street = ground ? ground.parentNode : null;
   var sc = null, sx = null, SW = 0, SH = 0;
-  var splashes = [], boats = [], ripples = [], flows = [], boatNear = false;
+  var splashes = [], boats = [], ripples = [], flows = [], boatDx = 1e9; /* the nearest floating boat, left (-) or right (+) of the dog */
   /* notebook, newspaper and coloured-craft paper: every boat a different sheet */
   var PAPERS = ['#fbf3e4', '#f6dde3', '#dbe9f4', '#f2e5bf', '#e2efd8'];
 
@@ -502,7 +540,7 @@
       var lr = lamp.getBoundingClientRect(), sr = sc.getBoundingClientRect();
       dogX = lr.left - sr.left + 150 * (lr.height / 590);
     }
-    boatNear = false;
+    boatDx = 1e9;
     for (var j = boats.length - 1; j >= 0; j--) {
       var b = boats[j];
       if (!b.floating) {
@@ -519,7 +557,7 @@
         b.wake += dt;
         if (b.wake > 0.6) { b.wake = 0; ring(b.x - b.s, wy, false); }
         if (b.x - 2 * b.s > SW) { boats.splice(j, 1); continue; }
-        if (Math.abs(b.x - dogX) < 90) boatNear = true;
+        if (Math.abs(b.x - dogX) < Math.abs(boatDx)) boatDx = b.x - dogX;
       }
       drawBoat(b, wy, t);
     }
@@ -632,11 +670,7 @@
         lit = 1;
         happyAt = t;
         applyLight(0, 1);
-        if (outFirst) {
-          outFirst = false;
-          showHint(FOUND_NOTE);
-          setTimeout(hideHint, 5000);
-        }
+        if (outFirst) { outFirst = false; afterFound(); }
         teaseAt = t + 25000 + Math.random() * 15000;
         return;
       }
@@ -649,7 +683,7 @@
       return;
     }
     /* the loose wire */
-    if (teaseFrom < 0 && teaseAt && t > teaseAt) teaseFrom = t;
+    if (teaseFrom < 0 && teaseAt && t > teaseAt) { teaseFrom = t; lookUpUntil = t + 1500; } /* the dog looks up at it too */
     if (teaseFrom >= 0) {
       var e = t - teaseFrom;
       lit = e > 240 ? 1 : stepAt(TEASE, e);
@@ -660,6 +694,12 @@
         teaseAt = t + (lampFound ? 25000 + Math.random() * 15000 : 9000 + Math.random() * 9000);
       }
     }
+  }
+
+  /* a kind word for finding it; then, if the boat is still a secret, point at that */
+  function afterFound() {
+    showHint(FOUND_NOTE);
+    setTimeout(function () { if (!floated) showHint(BOAT_HINT); else hideHint(); }, 5000);
   }
 
   function lightsOut() {
@@ -689,7 +729,7 @@
         outAt = -1; lit = 1; flies = [];
         applyLight(0, 1);
         drawLamp(0, 0);
-        if (outFirst) { outFirst = false; showHint(FOUND_NOTE); setTimeout(hideHint, 5000); }
+        if (outFirst) { outFirst = false; afterFound(); }
       }, 2200);
       return;
     }
@@ -707,6 +747,26 @@
     });
   }
   if (!reduced && !lampFound) teaseAt = performance.now() + (floated ? 4000 : 20000);
+  /* not everyone floats a boat; after a while, point at the lamp anyway */
+  if (!floated && !lampFound) {
+    setTimeout(function () {
+      if (floated || lampFound) return;
+      showHint(LAMP_HINT);
+      teaseAt = performance.now() + 1200;
+    }, 15000);
+  }
+
+  /* pat the dog: a bounce, a wag, a tilt of the head and a small heart */
+  var dogHit = lamp ? lamp.querySelector('.dog-hit') : null;
+  if (dogHit && !reduced) {
+    dogHit.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var now = performance.now();
+      if (now - petAt < 500) return;
+      petAt = now;
+      hearts.push({ x: face > 0 ? 133 : 188, y: 392, born: now });
+    });
+  }
 
   /* ---------- lightning ---------- */
   /* a jagged path from the clouds down through the open sky, with one fork */

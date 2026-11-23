@@ -831,4 +831,17 @@ footer .brand { color: var(--ink); }
   -webkit-tap-highlight-color: transparent;
 }
 
+/* pat the dog */
+.dog-hit {
+  position: absolute;
+  left: 36%;
+  top: 63%;
+  width: 28%;
+  height: 32%;
+  z-index: 3;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .secret-note { color: var(--muted); font-family: var(--font-quirk); font-style: italic; font-size: 0.84rem; margin-top: 10px; opacity: 0.8; }
