@@ -669,7 +669,7 @@
   /* one small invitation, to float a boat, shown only until it's been done. The lamp gets no words:
      it flickers now and then and the dog looks up at it, and that's invitation enough */
   var BOAT_HINT = small ? 'tap the wet street to float a paper boat ↓' : '↓ click the wet street to float a paper boat';
-  var FOUND_NOTE = 'you found it. the dog was hoping someone would.';
+  var FOUND_NOTE = 'you found it. GhostGram was hoping someone would.';
   var hint = null, floated = false, lampFound = false;
   try {
     floated = localStorage.getItem('gg-boat') === '1';
