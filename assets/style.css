@@ -823,8 +823,8 @@ footer .brand { color: var(--ink); }
   position: absolute;
   left: 54%;
   top: 6%;
-  width: 36%;
-  height: 22%;
+  width: 38%;
+  height: 74%; /* the head and the post, down to just above the street (the street is for boats) */
   z-index: 2;
   pointer-events: auto;
   cursor: pointer;
