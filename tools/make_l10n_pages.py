@@ -166,7 +166,8 @@ def share(app, cfg, slug, short, page):
         ("LinkedIn", f"https://www.linkedin.com/sharing/share-offsite/?url={q(web('linkedin'))}"),
         (EMAIL[slug], f"mailto:?subject={q(app)}&body={q(msg(play('email')))}"),
     ]
-    btns = "\n      ".join(f'<a class="btn btn-ghost" href="{esc(u)}" rel="noopener" target="_blank">{esc(n)}</a>'
+    new_tab = ' rel="noopener" target="_blank"'  # not for the mailto: link, which would leave an empty tab
+    btns = "\n      ".join(f'<a class="btn btn-ghost" href="{esc(u)}"{new_tab if u.startswith("http") else ""}>{esc(n)}</a>'
                            for n, u in links)
     return f"""<section class="container share-band" aria-label="{esc(share_l)}" data-msg="{esc(msg(play('copy')))}">
     <h2 class="section-title">{esc(head.format(app=app))}</h2>
