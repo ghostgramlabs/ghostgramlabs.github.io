@@ -726,6 +726,15 @@ footer .brand { color: var(--ink); }
   .consent { left: 12px; right: 12px; max-width: none; }
 }
 
+/* on phones the street, the lamp and the dog sit at the bottom of the screen: keep the cookie
+   question small and at the top, so it never covers them */
+@media (max-width: 640px) {
+  .consent { top: 10px; bottom: auto; padding: 12px 14px; transform: none; box-shadow: 3px 3px 0 var(--ink); }
+  .consent p { font-size: 0.8rem; line-height: 1.4; }
+  .consent-actions { margin-top: 10px; }
+  .consent-actions .btn { padding: 7px 14px; font-size: 0.8rem; }
+}
+
 /* ---------- The street under the hero: a lamp, the termites round it, and the dog ---------- */
 .street { position: absolute; inset: 0; pointer-events: none; }
 
