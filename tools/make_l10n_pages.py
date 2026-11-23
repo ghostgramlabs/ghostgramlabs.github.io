@@ -21,7 +21,7 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from l10n_strings import NAMES, S, SHARE  # noqa: E402
+from l10n_strings import EMAIL, NAMES, S, SHARE  # noqa: E402
 from urllib.parse import quote  # noqa: E402
 
 SITE = pathlib.Path(__file__).resolve().parents[1]
@@ -146,13 +146,27 @@ def share(app, cfg, slug, short, page):
     def msg(link):
         return f"{short}\n{link}"
 
+    # Messaging apps first, then the networks people in this language use most, then the public ones.
     links = [
         ("WhatsApp", f"https://wa.me/?text={q(msg(play('whatsapp')))}"),
         ("Telegram", f"https://t.me/share/url?url={q(play('telegram'))}&text={q(short)}"),
+    ]
+    if slug in ("ja", "th", "zh-hant"):
+        links.append(("LINE", f"https://social-plugins.line.me/lineit/share?url={q(play('line'))}"))
+    if slug == "ru":
+        links.append(("VK", f"https://vk.com/share.php?url={q(web('vk'))}"))
+    if slug == "zh-hans":
+        links.append(("Weibo", f"https://service.weibo.com/share/share.php?url={q(web('weibo'))}&title={q(short)}"))
+    links += [
+        ("Reddit", f"https://www.reddit.com/submit?url={q(web('reddit'))}&title={q(short)}"),
         ("X", f"https://x.com/intent/post?text={q(short)}&url={q(web('x'))}"),
         ("Facebook", f"https://www.facebook.com/sharer/sharer.php?u={q(web('facebook'))}"),
+        ("Threads", f"https://www.threads.net/intent/post?text={q(msg(web('threads')))}"),
+        ("Bluesky", f"https://bsky.app/intent/compose?text={q(msg(web('bluesky')))}"),
+        ("LinkedIn", f"https://www.linkedin.com/sharing/share-offsite/?url={q(web('linkedin'))}"),
+        (EMAIL[slug], f"mailto:?subject={q(app)}&body={q(msg(play('email')))}"),
     ]
-    btns = "\n      ".join(f'<a class="btn btn-ghost" href="{esc(u)}" rel="noopener" target="_blank">{n}</a>'
+    btns = "\n      ".join(f'<a class="btn btn-ghost" href="{esc(u)}" rel="noopener" target="_blank">{esc(n)}</a>'
                            for n, u in links)
     return f"""<section class="container share-band" aria-label="{esc(share_l)}" data-msg="{esc(msg(play('copy')))}">
     <h2 class="section-title">{esc(head.format(app=app))}</h2>

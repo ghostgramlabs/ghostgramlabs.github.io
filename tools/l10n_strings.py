@@ -122,3 +122,11 @@ SHARE = {
     "sv": ("Hjälp {app} att nå fler", "{app} är gratis och tjänar inga pengar, så appen växer bara när folk delar den. Om den har hjälpt dig, skicka den till någon som kan ha nytta av den.", "Dela", "Kopiera meddelande", "Kopierat"),
     "th": ("ช่วยให้ {app} ไปถึงผู้คนมากขึ้น", "{app} ใช้ฟรีและไม่มีรายได้ใดๆ จึงจะเป็นที่รู้จักได้ก็ต่อเมื่อมีคนแชร์ หากแอปนี้มีประโยชน์กับคุณ ส่งต่อให้คนที่อาจต้องการได้เลย", "แชร์", "คัดลอกข้อความ", "คัดลอกแล้ว"),
 }
+
+# "Email" share button label.
+EMAIL = {
+    "en": "Email", "es": "Correo", "pt-br": "E-mail", "pt-pt": "Email", "zh-hans": "邮件", "zh-hant": "電子郵件",
+    "hi": "ईमेल", "de": "E-Mail", "fr": "E-mail", "id": "Email", "tr": "E-posta", "ru": "Эл. почта", "el": "Email",
+    "vi": "Email", "ja": "メール", "ar": "البريد الإلكتروني", "bn": "ইমেইল", "te": "ఈమెయిల్", "ta": "மின்னஞ்சல்",
+    "ml": "ഇമെയിൽ", "af": "E-pos", "nl": "E-mail", "it": "Email", "ko": "이메일", "sv": "E-post", "th": "อีเมล",
+}
