@@ -196,6 +196,7 @@
   var lx = lc ? lc.getContext('2d') : null;
   var bugs = [], litDrops = [], hearts = [];
   var dogMove = lamp ? lamp.querySelector('.dog-move') : null;
+  var dogHit = lamp ? lamp.querySelector('.dog-hit') : null;
   var dogHead = lamp ? lamp.querySelector('.dog-head') : null;
   var dogTail = lamp ? lamp.querySelector('.dog-tail') : null;
   var BULB = [203, 80]; /* in the lamp drawing's own units (320 x 590) */
@@ -332,12 +333,96 @@
     }
   }
 
-  /* ---------- the dog: small, calm moves; it always faces the same way ---------- */
+  /* ---------- the dog: small, calm moves. When a paper boat comes down the gutter it gets up, walks over,
+     sits to see it go by, then walks back to its place under the lamp ---------- */
   var headA = 0, headTo = 0, nextLook = 0;
   var lookUpUntil = 0, petAt = -1e9;
+  var dogSit = lamp ? lamp.querySelector('.dog-sit') : null;
+  var dogStand = lamp ? lamp.querySelector('.dog-stand') : null;
+  var dogHeadPos = lamp ? lamp.querySelector('.dog-head-pos') : null;
+  var dogTail2 = lamp ? lamp.querySelector('.dog-tail2') : null;
+  var dogShadow = lamp ? lamp.querySelector('.dog-shadow') : null;
+  var eyePos = lamp ? lamp.querySelector('.dog-eye-pos') : null;
+  var LEGS = lamp ? [
+    [lamp.querySelector('.leg-fn'), 92, 142, 0],            /* near front, swings from the shoulder */
+    [lamp.querySelector('.leg-ff'), 104, 142, Math.PI],     /* far front */
+    [lamp.querySelector('.leg-rn > g'), 156, 146, Math.PI], /* near back, swings from the hip */
+    [lamp.querySelector('.leg-rf > g'), 156, 146, 0]        /* far back */
+  ] : [];
+  var DOG_CX = 160.8; /* the dog's middle, in the lamp drawing's units: it turns round on this line */
+  var WALK = 62;      /* walking speed in drawing units a second: an easy amble */
+  var dogMode = 'home', modeAt = 0, pose = 0, poseTo = 0, walkX = 0, face = 1, gait = 0, lastDogT = 0;
+
+  function ease(x) { x = x < 0 ? 0 : x > 1 ? 1 : x; return x * x * (3 - 2 * x); }
+  function setMode(m, t) { dogMode = m; modeAt = t; }
+
+  /* how far left the dog may go: never off the screen, never too far from its lamp (drawing units, negative) */
+  function walkLimit() {
+    var k = lamp.clientHeight / 590, left = lamp.getBoundingClientRect().left;
+    return Math.max(-(small ? 300 : 420), Math.min(0, (16 - left) / k - 100));
+  }
 
   function dogTick(t) {
     if (!dogMove) return;
+    var dt = lastDogT ? Math.min((t - lastDogT) / 1000, 0.05) : 0;
+    lastDogT = t;
+    var k = lamp.clientHeight / 590; /* screen pixels per drawing unit */
+    var dark = outAt >= 0;
+    var noBoat = boatDx > 1e8;
+
+    /* where it is going, one step at a time */
+    var stepping = 0, sinceMode = t - modeAt;
+    if (dogMode === 'home') {
+      poseTo = 0;
+      if (!dark && pose < 0.02 && boatDx < -60 && boatDx > walkLimit() * k - 500) setMode('rise', t);
+    } else if (dogMode === 'rise') { /* gets up */
+      poseTo = 1;
+      if (pose > 0.98 && sinceMode > 250) setMode('out', t);
+    } else if (dogMode === 'out') { /* walks to meet the boat */
+      if (noBoat || boatDx > -60 * k / 0.88 || walkX <= walkLimit()) setMode('settle', t);
+      else stepping = -1;
+    } else if (dogMode === 'settle') { /* sits down to see it go by */
+      poseTo = 0;
+      if (pose < 0.02) setMode('watch', t);
+    } else if (dogMode === 'watch') {
+      if (sinceMode > 1800 && (noBoat || boatDx > 90)) setMode(walkX > -2 ? 'home' : 'up', t);
+    } else if (dogMode === 'up') { /* gets up and turns round */
+      poseTo = 1;
+      if (pose > 0.98 && sinceMode > 450) { face = -1; setMode('back', t); }
+    } else if (dogMode === 'back') { /* walks back to the lamp */
+      stepping = 1;
+      if (walkX >= 0) { walkX = 0; stepping = 0; setMode('turn', t); }
+    } else if (dogMode === 'turn') { /* a moment's pause, faces the street again, then sits */
+      if (sinceMode > 300) face = 1;
+      if (sinceMode > 550) setMode('home', t);
+    }
+
+    pose += (poseTo - pose) * Math.min(1, dt * 5);
+    if (Math.abs(poseTo - pose) < 0.004) pose = poseTo;
+    if (stepping) {
+      walkX += stepping * WALK * dt;
+      if (walkX > 0) walkX = 0;
+      gait += WALK * dt / 46 * 6.283;
+    } else {
+      gait += (Math.round(gait / Math.PI) * Math.PI - gait) * Math.min(1, dt * 8); /* the feet come together when it stops */
+    }
+    var walking = stepping !== 0;
+
+    /* sitting and standing: a short cross-fade, the head rising or settling between the two */
+    var ps = ease(pose), fadeIn = ease((pose - 0.4) / 0.2);
+    dogSit.setAttribute('opacity', (1 - fadeIn).toFixed(3));
+    dogStand.setAttribute('opacity', fadeIn.toFixed(3));
+    dogSit.style.display = fadeIn > 0.999 ? 'none' : '';
+    dogStand.style.display = fadeIn < 0.001 ? 'none' : '';
+    var bob = walking ? Math.abs(Math.sin(gait)) * 1.4 : 0;
+    var headPos = 'translate(' + (-6 * ps).toFixed(2) + ' ' + (40 * ps - bob).toFixed(2) + ')';
+    dogHeadPos.setAttribute('transform', headPos);
+    if (eyePos) eyePos.setAttribute('transform', headPos);
+    for (var li = 0; li < LEGS.length; li++) {
+      var L = LEGS[li];
+      if (L[0]) L[0].setAttribute('transform', 'rotate(' + (Math.sin(gait + L[3]) * 15).toFixed(2) + ' ' + L[1] + ' ' + L[2] + ')');
+    }
+
     /* now and then a slight glance up at the swarm or out at the street */
     if (t > nextLook) {
       var watching = bugs.length > 4;
@@ -347,11 +432,12 @@
     var since = t - flinchAt;
     var flinch = since > 0 && since < 700 ? Math.sin(since / 700 * Math.PI) : 0; /* ducks a little at the thunder */
 
-    /* a boat close by gets a small nod towards it */
     var aim = headTo, excited = false;
-    if (Math.abs(boatDx) < 200) { aim = -3; excited = true; }
+    if (Math.abs(boatDx) < 200) { aim = -3; excited = true; } /* a small nod towards a boat close by */
+    if (dogMode === 'watch' && !noBoat) { aim = boatDx < 0 ? -4 : -6; excited = true; }
+    if (pose > 0.05) aim = -2; /* on its feet it looks where it's going */
     if (t < lookUpUntil && !excited) aim = 7; /* the lamp flickered: a glance up at it */
-    if (outAt >= 0 && t - outAt > 500) aim = 7; /* in the dark it looks up at the lamp, waiting */
+    if (dark && t - outAt > 500) aim = 7; /* in the dark it looks up at the lamp, waiting */
     var petted = t - petAt;
     if (petted > 0 && petted < 1400) aim = 4 + Math.sin(petted / 1400 * Math.PI) * 3; /* a content tilt when patted */
     headA += (aim - flinch * 4 - headA) * 0.035;
@@ -363,11 +449,17 @@
     var glad = Math.min(t - happyAt, petted);
     if (glad > 0 && glad < 1800) wag = Math.sin(t * 0.012) * 6 * (1 - glad / 1800); /* light back, or a pat: a short wag */
     dogTail.setAttribute('transform', 'rotate(' + wag.toFixed(2) + ' 147 150)');
+    if (dogTail2) dogTail2.setAttribute('transform', 'rotate(' + (wag * 0.8).toFixed(2) + ' 170 120)');
 
     var shake = 0, s = t - shakeAt;
-    if (shakeAt && s > 0 && s < 900) shake = Math.sin(s * 0.08) * 2 * (1 - s / 900); /* shakes the rain off */
-    dogMove.setAttribute('transform', 'translate(52 ' + (368 + flinch * 1.5).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)');
-    if (eyeMove) eyeMove.setAttribute('transform', dogMove.getAttribute('transform'));
+    if (shakeAt && s > 0 && s < 900 && pose < 0.02) shake = Math.sin(s * 0.08) * 2 * (1 - s / 900); /* shakes the rain off */
+    var tr = 'translate(' + walkX.toFixed(2) + ' 0)' +
+      (face < 0 ? ' translate(' + DOG_CX + ' 0) scale(-1 1) translate(' + (-DOG_CX) + ' 0)' : '') +
+      ' translate(52 ' + (368 + flinch * 1.5).toFixed(2) + ') scale(.85) rotate(' + shake.toFixed(2) + ' 120 210)';
+    dogMove.setAttribute('transform', tr);
+    if (eyeMove) eyeMove.setAttribute('transform', tr);
+    if (dogShadow) dogShadow.setAttribute('transform', 'translate(' + walkX.toFixed(2) + ' 0)');
+    if (dogHit) dogHit.style.pointerEvents = dogMode === 'home' ? '' : 'none'; /* pats are for when it's at home */
   }
 
   /* ---------- the street: rain splashing on it, water running along the gutter, and paper boats ---------- */
@@ -523,7 +615,7 @@
     var dogX = -1e9;
     if (lamp) {
       var lr = lamp.getBoundingClientRect(), sr = sc.getBoundingClientRect();
-      dogX = lr.left - sr.left + 150 * (lr.height / 590);
+      dogX = lr.left - sr.left + (150 + walkX) * (lr.height / 590); /* follows the dog when it walks */
     }
     boatDx = 1e9;
     for (var j = boats.length - 1; j >= 0; j--) {
@@ -742,7 +834,6 @@
   }
 
   /* pat the dog: a short wag, a tilt of the head and a small heart */
-  var dogHit = lamp ? lamp.querySelector('.dog-hit') : null;
   if (dogHit && !reduced) {
     dogHit.addEventListener('click', function (e) {
       e.stopPropagation();

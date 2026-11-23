@@ -192,9 +192,11 @@
           <defs>
             <!-- night: dims the dog when the lamp goes out (the slopes are set from site.js) -->
             <filter id="night" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR class="night-f" type="linear" slope="1"/><feFuncG class="night-f" type="linear" slope="1"/><feFuncB class="night-f" type="linear" slope="1"/></feComponentTransfer></filter>
-            <clipPath id="ground-clip"><rect x="-200" y="561" width="720" height="40"/></clipPath>
+            <clipPath id="ground-clip"><rect x="-2000" y="561" width="2520" height="40"/></clipPath>
             <g id="dog-fig">
               <g class="dog-move" transform="translate(52 368) scale(.85)">
+                <!-- sitting (its usual pose) -->
+                <g class="dog-sit">
                 <g class="dog-tail">
                   <path d="M150 152C172 142 178 116 165 106 154 98 140 106 147 118" fill="none" stroke="#1c1a17" stroke-width="17" stroke-linecap="round"/>
                   <path d="M150 152C172 142 178 116 165 106 154 98 140 106 147 118" fill="none" stroke="#d68b45" stroke-width="11" stroke-linecap="round"/>
@@ -217,6 +219,19 @@
                 <path d="M117 180C121 164 142 159 155 171" fill="none" stroke="#1c1a17" stroke-width="2.4" stroke-linecap="round"/>
                 <path d="M98 80C90 92 83 106 82 122 83 140 90 150 97 146 98 124 101 102 108 86Z" fill="#fffaf2"/>
                 <path d="M79 222C79 225 82 226 87 226L98.5 226 98.5 222ZM110 220L148 220C148 223 146 225 140 225L111 225Z" fill="#fffaf2"/>
+                </g>
+                <!-- standing and walking, shown only when it goes to see a boat -->
+                <g class="dog-stand" opacity="0">
+                <g class="leg-rf" transform="translate(-10 0)"><g><path d="M146 136C170 132 176 156 170 176L165 196L166 219Q167 227 160 227L152 227Q149 222 154 219L154 198C146 184 140 160 146 136Z" fill="#1c1a17" stroke="#1c1a17" stroke-width="6" stroke-linejoin="round"/><path d="M146 136C170 132 176 156 170 176L165 196L166 219Q167 227 160 227L152 227Q149 222 154 219L154 198C146 184 140 160 146 136Z" fill="#b5702f"/><path d="M154.4 219Q149 222 152 227L160 227Q167 227 166 219Z" fill="#fffaf2"/></g></g><g class="leg-ff"><path d="M96 140C97 170 99 190 99 219Q97 227 104 227L111 227Q112 222 109 219C109 190 112 170 113 140Z" fill="#1c1a17" stroke="#1c1a17" stroke-width="6" stroke-linejoin="round"/><path d="M96 140C97 170 99 190 99 219Q97 227 104 227L111 227Q112 222 109 219C109 190 112 170 113 140Z" fill="#b5702f"/><path d="M98.4 219Q97 227 104 227L111 227Q112 222 109.8 219Z" fill="#fffaf2"/></g>
+                <g class="dog-tail2"><path d="M170 120C190 114 194 88 182 80 172 74 160 84 168 94" fill="none" stroke="#1c1a17" stroke-width="17" stroke-linecap="round"/><path d="M170 120C190 114 194 88 182 80 172 74 160 84 168 94" fill="none" stroke="#d68b45" stroke-width="11" stroke-linecap="round"/><path d="M172 85C168 87 166 91 168 94" fill="none" stroke="#fffaf2" stroke-width="11" stroke-linecap="round"/></g>
+                <path d="M90 116C104 106 150 106 166 112C178 118 180 138 174 150C170 158 162 162 152 162C136 158 116 160 104 166C92 168 82 158 81 144C80 130 83 122 90 116Z" fill="#1c1a17" stroke="#1c1a17" stroke-width="6" stroke-linejoin="round"/><path d="M84 130C84 112 92 96 104 88L117 98C122 106 126 112 130 116L96 124Z" fill="#1c1a17" stroke="#1c1a17" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M90 116C104 106 150 106 166 112C178 118 180 138 174 150C170 158 162 162 152 162C136 158 116 160 104 166C92 168 82 158 81 144C80 130 83 122 90 116Z" fill="#d68b45"/><path d="M84 130C84 112 92 96 104 88L117 98C122 106 126 112 130 116L96 124Z" fill="#d68b45"/>
+                <path d="M84 132C84 120 88 110 94 102L102 112C96 122 94 136 96 150 90 150 85 142 84 132Z" fill="#fffaf2"/>
+                <path d="M112 158C126 154 140 154 150 158" fill="none" stroke="#1c1a17" stroke-width="2.2" stroke-linecap="round"/>
+                <g class="leg-fn"><path d="M84 140C85 170 87 190 87 219Q85 227 92 227L99 227Q100 222 97 219C97 190 100 170 101 140Z" fill="#1c1a17" stroke="#1c1a17" stroke-width="6" stroke-linejoin="round"/><path d="M84 140C85 170 87 190 87 219Q85 227 92 227L99 227Q100 222 97 219C97 190 100 170 101 140Z" fill="#d68b45"/><path d="M86.4 219Q85 227 92 227L99 227Q100 222 97.8 219Z" fill="#fffaf2"/></g><g class="leg-rn" transform="translate(0 0)"><g><path d="M146 136C170 132 176 156 170 176L165 196L166 219Q167 227 160 227L152 227Q149 222 154 219L154 198C146 184 140 160 146 136Z" fill="#1c1a17" stroke="#1c1a17" stroke-width="6" stroke-linejoin="round"/><path d="M146 136C170 132 176 156 170 176L165 196L166 219Q167 227 160 227L152 227Q149 222 154 219L154 198C146 184 140 160 146 136Z" fill="#d68b45"/><path d="M154.4 219Q149 222 152 227L160 227Q167 227 166 219Z" fill="#fffaf2"/></g></g>
+                <path d="M84 136C88 128 102 126 108 132 110 142 106 156 101 162 95 164 88 160 85 152Z" fill="#d68b45"/><path d="M84 134C84 124 88 114 94 106L100 114C96 122 93 132 92 140 88 140 85 138 84 134Z" fill="#fffaf2"/>
+                </g>
+                <g class="dog-head-pos">
                 <g class="dog-head">
                   <path d="M60 55C68 53 76 52 82 51 86 47 89 43 92 40L94 10 104 33 112 11 118 40C124 47 125 58 120 67 115 75 107 80 99 81L80 77C72 76 65 74 60 71 55 68 54 59 60 55Z" fill="#1c1a17" stroke="#1c1a17" stroke-width="6" stroke-linejoin="round"/>
                   <path d="M60 55C68 53 76 52 82 51 86 47 89 43 92 40L94 10 104 33 112 11 118 40C124 47 125 58 120 67 115 75 107 80 99 81L80 77C72 76 65 74 60 71 55 68 54 59 60 55Z" fill="#d68b45"/>
@@ -226,6 +241,7 @@
                   <circle cx="90.8" cy="49.3" r="1.05" fill="#fff"/>
                   <ellipse cx="57" cy="59" rx="4.6" ry="3.9" fill="#1c1a17"/>
                   <path d="M58.5 67Q68 71 78 70" stroke="#1c1a17" stroke-width="2" fill="none" stroke-linecap="round"/>
+                </g>
                 </g>
               </g>
             </g>
@@ -239,12 +255,12 @@
           <path d="M190 68l30-4-5 15-22 1z" fill="#120d16"/>
           <ellipse class="bulb" cx="203" cy="80" rx="10" ry="5" fill="#ffe0ad"/>
           <g clip-path="url(#ground-clip)" opacity=".16"><use href="#dog-fig" transform="translate(0 1122) scale(1 -1)"/></g>
-          <ellipse cx="150" cy="561.5" rx="48" ry="5" fill="#0d0911" opacity=".75"/>
+          <ellipse class="dog-shadow" cx="150" cy="561.5" rx="48" ry="5" fill="#0d0911" opacity=".75"/>
           <use class="dog-use" href="#dog-fig"/>
           <!-- the dog's eye, on its own layer so it stays bright in the dark; moves with the dog's head -->
-          <g class="dog-eye-move" transform="translate(52 368) scale(.85)"><g class="dog-eye-head">
+          <g class="dog-eye-move" transform="translate(52 368) scale(.85)"><g class="dog-eye-pos"><g class="dog-eye-head">
             <g class="dog-eyes" opacity="0"><circle cx="89" cy="49.8" r="15" fill="#c8ff7a" opacity=".12"/><circle cx="89" cy="49.8" r="8" fill="#c8ff7a" opacity=".3"/><ellipse class="dog-eye-glow" cx="89" cy="49.8" rx="4" ry="2.8" fill="#f2ffd0"/></g>
-          </g></g>
+          </g></g></g>
         </svg>
         <canvas class="lamp-canvas"></canvas>
         <div class="lamp-hit"></div>
@@ -490,6 +506,6 @@
     <div class="footer-bottom">© 2026 GhostGram Labs. Google Play and the Google Play logo are trademarks of Google LLC.</div>
   </div>
 </footer>
-<script src="/assets/site.js?v=20261123a" defer></script>
+<script src="/assets/site.js?v=20261123b" defer></script>
 </body>
 </html>
