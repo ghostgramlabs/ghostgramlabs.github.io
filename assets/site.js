@@ -657,11 +657,8 @@
         floated = true;
         try { localStorage.setItem('gg-boat', '1'); } catch (err) {}
         hideHint();
-        /* one secret found: point at the next one, a moment later, and let the lamp flicker to catch the eye */
-        if (!lampFound) {
-          setTimeout(function () { if (!lampFound) showHint(LAMP_HINT); }, 1600);
-          teaseAt = performance.now() + 2600;
-        }
+        /* one secret found: let the lamp flicker a moment later to catch the eye (no words; the dog looks up at it) */
+        if (!lampFound) teaseAt = performance.now() + 2600;
       }
     });
     hero.addEventListener('mousemove', function (e) {
@@ -669,9 +666,9 @@
     });
   }
 
-  /* small invitations, one at a time: float a boat first, then the lamp. Each shows only until it's been found. */
+  /* one small invitation, to float a boat, shown only until it's been done. The lamp gets no words:
+     it flickers now and then and the dog looks up at it, and that's invitation enough */
   var BOAT_HINT = small ? 'tap the wet street to float a paper boat ↓' : '↓ click the wet street to float a paper boat';
-  var LAMP_HINT = 'psst… that lamp looks a little loose ↗';
   var FOUND_NOTE = 'you found it. the dog was hoping someone would.';
   var hint = null, floated = false, lampFound = false;
   try {
@@ -695,7 +692,6 @@
   function hideHint() { if (hint) hint.classList.add('gone'); }
 
   if (!floated) showHint(BOAT_HINT);
-  else if (!lampFound) showHint(LAMP_HINT);
 
   /* ---------- lights out: tap the lamp and it flickers and dies; in the dark only the dog's eye glows,
      then the light buzzes back and the dog is glad. Now and then the lamp flickers on its own, as if
@@ -824,13 +820,9 @@
     });
   }
   if (!reduced && !lampFound) teaseAt = performance.now() + (floated ? 4000 : 20000);
-  /* not everyone floats a boat; after a while, point at the lamp anyway */
-  if (!floated && !lampFound) {
-    setTimeout(function () {
-      if (floated || lampFound) return;
-      showHint(LAMP_HINT);
-      teaseAt = performance.now() + 1200;
-    }, 15000);
+  /* not everyone floats a boat; after a while, let the lamp flicker anyway */
+  if (!floated && !lampFound && !reduced) {
+    setTimeout(function () { if (!floated && !lampFound) teaseAt = performance.now() + 1200; }, 15000);
   }
 
   /* pat the dog: a short wag, a tilt of the head and a small heart */
