@@ -21,7 +21,7 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from l10n_strings import EMAIL, NAMES, S, SHARE  # noqa: E402
+from l10n_strings import EMAIL, FEATURE, NAMES, S, SHARE  # noqa: E402
 from urllib.parse import quote  # noqa: E402
 
 SITE = pathlib.Path(__file__).resolve().parents[1]
@@ -183,6 +183,15 @@ def share(app, cfg, slug, short, page):
   </section>"""
 
 
+def feature(app, slug):
+    """Ask for feature requests by email. The subject stays English so the requests are easy to find."""
+    head, text = FEATURE[slug]
+    link = (f'<a href="mailto:ghostgramlabs@gmail.com?subject={quote(app + " feature request")}">'
+            'ghostgramlabs@gmail.com</a>')
+    return (f'<section class="container">\n    <div class="prose">\n      <h2>{esc(head)}</h2>\n'
+            f'      <p>{esc(text).format(app=esc(app), email=link)}</p>\n    </div>\n  </section>')
+
+
 def switcher(app, pages, current, label):
     items = [("", "en")] + pages
     links = []
@@ -274,6 +283,8 @@ PAGE = """<!DOCTYPE html>
       {body}
     </div>
   </section>
+
+  {feature}
 
   <section class="container">
     <div class="download-band">
@@ -390,7 +401,7 @@ def build():
                 play=f"https://play.google.com/store/apps/details?id={cfg['package']}&amp;hl={play.replace('-', '_')}",
                 svg=PLAY_SVG,
                 playlabel=esc(t["play"]), shots=shot_html, body=body_html(full), statement=esc(t["statement"]),
-                switcher=switcher(app, pairs, slug, t["other"]), share=share(app, cfg, slug, short, url), privacy=cfg["privacy"], terms=cfg["terms"],
+                switcher=switcher(app, pairs, slug, t["other"]), share=share(app, cfg, slug, short, url), feature=feature(app, slug), privacy=cfg["privacy"], terms=cfg["terms"],
                 privacylabel=esc(t["privacy"]), termslabel=esc(t["terms"]), code=cfg["code"],
                 jsonld=jsonld(app, cfg, title, short, url, hl, t["statement"]))
             out = cfg["out"] / slug / "index.html"

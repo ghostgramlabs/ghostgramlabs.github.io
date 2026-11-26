@@ -130,3 +130,33 @@ EMAIL = {
     "vi": "Email", "ja": "メール", "ar": "البريد الإلكتروني", "bn": "ইমেইল", "te": "ఈమెయిల్", "ta": "மின்னஞ்சல்",
     "ml": "ഇമെയിൽ", "af": "E-pos", "nl": "E-mail", "it": "Email", "ko": "이메일", "sv": "E-post", "th": "อีเมล",
 }
+
+# "Missing a feature?" band: heading, then text with {app} and {email} (the mailto link) filled in.
+FEATURE = {
+    "en": ("Missing a feature?", "If there's something you wish {app} did, or something that gets in your way, just email me at {email}. I read every message myself, and you're welcome to write in your own language."),
+    "es": ("¿Echas en falta alguna función?", "Si hay algo que te gustaría que {app} hiciera, o algo que te estorba, escríbeme a {email}. Leo cada mensaje personalmente, y puedes escribirme en tu propio idioma."),
+    "pt-br": ("Sentiu falta de algum recurso?", "Se há algo que você gostaria que o {app} fizesse, ou algo que atrapalha, é só mandar um e-mail para {email}. Leio pessoalmente cada mensagem, e você pode escrever no seu idioma."),
+    "pt-pt": ("Falta alguma funcionalidade?", "Se há algo que gostaria que a {app} fizesse, ou algo que esteja a atrapalhar, envie-me um email para {email}. Leio pessoalmente cada mensagem, e pode escrever no seu idioma."),
+    "zh-hans": ("缺少什么功能？", "如果你希望 {app} 能做到某件事，或者有什么地方用着不顺手，直接发邮件到 {email} 告诉我。每封邮件我都会亲自阅读，也欢迎用你自己的语言来写。"),
+    "zh-hant": ("缺少什麼功能？", "如果你希望 {app} 能做到某件事，或是有什麼地方用起來不順手，直接寄信到 {email} 告訴我。每封信我都會親自閱讀，也歡迎用你自己的語言來寫。"),
+    "hi": ("कोई फ़ीचर चाहिए?", "अगर आप चाहते हैं कि {app} कुछ और भी करे, या कोई चीज़ परेशान करती है, तो बस {email} पर ईमेल करें। हर मैसेज सीधे मुझ तक पहुँचता है, और आप अपनी भाषा में लिख सकते हैं।"),
+    "de": ("Fehlt dir eine Funktion?", "Wenn du dir wünschst, dass {app} etwas kann, oder dich etwas stört, schreib mir einfach an {email}. Ich lese jede Nachricht selbst, und du kannst gern in deiner eigenen Sprache schreiben."),
+    "fr": ("Une fonction vous manque ?", "S'il y a quelque chose que vous aimeriez que {app} fasse, ou quelque chose qui vous gêne, écrivez-moi simplement à {email}. Je lis chaque message moi-même, et vous pouvez m'écrire dans votre langue."),
+    "id": ("Ada fitur yang kurang?", "Kalau ada sesuatu yang Anda ingin bisa dilakukan {app}, atau ada yang mengganggu, kirim saja email ke {email}. Saya membaca setiap pesan sendiri, dan Anda boleh menulis dalam bahasa Anda sendiri."),
+    "tr": ("Eksik bir özellik mi var?", "{app} uygulamasının yapmasını istediğiniz bir şey ya da sizi rahatsız eden bir şey varsa, bana {email} adresinden e-posta gönderin. Her mesajı kendim okuyorum ve kendi dilinizde yazabilirsiniz."),
+    "ru": ("Не хватает какой-то функции?", "Если вам хочется, чтобы {app} умело что-то ещё, или что-то мешает, просто напишите мне на {email}. Каждое письмо я читаю лично, и писать можно на своём языке."),
+    "el": ("Σας λείπει κάποια λειτουργία;", "Αν θα θέλατε το {app} να κάνει κάτι ακόμα ή κάτι σας δυσκολεύει, στείλτε μου απλώς email στο {email}. Διαβάζω προσωπικά κάθε μήνυμα και μπορείτε να γράψετε στη γλώσσα σας."),
+    "vi": ("Thiếu tính năng nào?", "Nếu bạn muốn {app} làm được điều gì đó, hoặc có chỗ nào gây khó chịu, chỉ cần gửi email cho tôi tại {email}. Tôi tự đọc từng tin nhắn, và bạn có thể viết bằng ngôn ngữ của mình."),
+    "ja": ("ほしい機能はありますか？", "{app} にこんなことができたら、ここが使いにくい、ということがあれば、{email} まで気軽にメールしてください。すべてのメールに自分で目を通しています。日本語で書いていただいて大丈夫です。"),
+    "ar": ("هل تفتقد ميزة ما؟", "إذا كان هناك شيء تتمنى أن يفعله {app}، أو شيء يزعجك أثناء الاستخدام، فما عليك إلا مراسلتي على {email}. أقرأ كل رسالة بنفسي، ويمكنك الكتابة بلغتك."),
+    "bn": ("কোনো ফিচার দরকার?", "{app}-এ যদি এমন কিছু চান যা এখনো নেই, বা কিছু যদি অসুবিধা করে, তাহলে আমাকে {email}-এ ইমেইল করুন। প্রতিটি মেসেজ আমি নিজে পড়ি, আর আপনি নিজের ভাষাতেই লিখতে পারেন।"),
+    "te": ("ఏదైనా ఫీచర్ కావాలా?", "{app}లో ఇంకా లేని ఏదైనా కావాలనుకుంటే, లేదా ఏదైనా ఇబ్బంది పెడుతుంటే, నాకు {email}కి ఈమెయిల్ చేయండి. ప్రతి మెసేజ్‌ను నేనే స్వయంగా చదువుతాను, మీరు మీ భాషలోనే రాయవచ్చు."),
+    "ta": ("ஏதாவது வசதி தேவையா?", "{app}-இல் இன்னும் இல்லாத ஏதாவது வேண்டுமென்றால், அல்லது ஏதாவது சிரமமாக இருந்தால், {email} என்ற முகவரிக்கு எனக்கு மின்னஞ்சல் அனுப்புங்கள். ஒவ்வொரு செய்தியையும் நானே படிக்கிறேன்; நீங்கள் உங்கள் மொழியிலேயே எழுதலாம்."),
+    "ml": ("ഏതെങ്കിലും ഫീച്ചർ വേണോ?", "{app}-ൽ ഇപ്പോൾ ഇല്ലാത്ത എന്തെങ്കിലും വേണമെങ്കിൽ, അല്ലെങ്കിൽ എന്തെങ്കിലും ബുദ്ധിമുട്ടുണ്ടാക്കുന്നുണ്ടെങ്കിൽ, {email} എന്ന വിലാസത്തിൽ എനിക്ക് ഇമെയിൽ അയയ്ക്കൂ. ഓരോ സന്ദേശവും ഞാൻ തന്നെയാണ് വായിക്കുന്നത്, നിങ്ങളുടെ സ്വന്തം ഭാഷയിൽ എഴുതാം."),
+    "af": ("Kort jy 'n funksie?", "As daar iets is wat jy wens {app} kon doen, of iets wat jou pla, e-pos my net by {email}. Ek lees self elke boodskap, en jy is welkom om in jou eie taal te skryf."),
+    "nl": ("Mis je een functie?", "Is er iets wat je graag in {app} zou zien, of zit iets je in de weg? Mail me gewoon op {email}. Ik lees elk bericht zelf, en je mag gerust in je eigen taal schrijven."),
+    "it": ("Ti manca una funzione?", "Se c'è qualcosa che vorresti che {app} facesse, o qualcosa che ti intralcia, scrivimi a {email}. Leggo personalmente ogni messaggio, e puoi scrivere nella tua lingua."),
+    "ko": ("필요한 기능이 있나요?", "{app}에 있었으면 하는 기능이나 불편한 점이 있다면 {email}로 메일 보내 주세요. 모든 메일을 직접 읽고 있으며, 한국어로 쓰셔도 괜찮습니다."),
+    "sv": ("Saknar du en funktion?", "Om det finns något du önskar att {app} kunde göra, eller något som är i vägen, mejla mig bara på {email}. Jag läser varje meddelande själv, och du får gärna skriva på ditt eget språk."),
+    "th": ("อยากได้ฟีเจอร์อะไรเพิ่มไหม?", "ถ้ามีอะไรที่อยากให้ {app} ทำได้ หรือมีอะไรที่ใช้แล้วไม่สะดวก ส่งอีเมลมาที่ {email} ได้เลย ผู้พัฒนาอ่านทุกข้อความเอง และเขียนมาเป็นภาษาไทยได้เลย"),
+}
